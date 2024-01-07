@@ -1,0 +1,65 @@
+You probably will see a lot of open-source code in Python for image processing.  yt7t7uygtryyrrt5y
+But we are focus on the approximate FFT, in this case,
+ as the kernel of blur detection. Let the rest of program do the other functions. 
+ 
+It is very easy to embed C++ code as function for Python program, 
+as many low-level libraries of Python is written in C/C++. 
+So don't worry if the main body of the blur detection is Python 
+or any other languages, it definitely can be interfaced with developed
+ C++ functions. 
+
+You might find the paper about blur detection useful. 
+Image partial blur detection and classification | IEEE Conference Publication 
+| IEEE Xplore
+And there is some principle about the FFT in image processing. 
+Image Transforms - Fourier Transform (ed.ac.uk)
+
+There are some open-source codes on GitHub or some blogs about blur detection 
+using FFT. You could also check it out and discuss with me later which 
+one would be more suitable for the project later on. 
+
+Here is some detail about the project "Approximate FFT based Image Blur Detection" 
+you picked, which could help you to submit the project description. 
+The keywords of this project are Approximate Computing (AC), Fast Fourier Transform 
+(FFT), and Image Blur Detection (IBD). 
+In terms of AC, we are focus on approximate arithmetic based reduced precision
+method, e.g. from double precision to single precision. But we are going to 
+explore more flexibility beyond that.  
+In terms of FFT,  we are focus on arbitrary length FFT based on Bluestein's method. 
+In terms of IBD, it is about FFT based detection hence no neural network or 
+other component. 
+Overall, we are going to investigate the potential acceleration of FFT based on 
+AC for IBD. 
+For the project description, you are expected to do some initial literature 
+review of above techniques, and you could refer to mine as follow (please don't
+just copy it):
+"
+
+
+
+Approximate Image Blur Detection based on FFT 
+Image quality is a very important metric for many image processing and computer 
+vision applications, such as object detection, classification, and tracking, 
+etc.., while the blur detection is one of the techniques to before 
+justifying/classifying the image quality. In this project, students are going to 
+explore the Image Blur Detection (IBD) based on Fast Fourier Transform (FFT) 
+algorithm, specially an approximate version of FFT, so as to improve the 
+efficiency of existing IBD algorithm in terms of speed, memory footprint, 
+power or energy, etc.. Potentially reduced precision, artificial neural network 
+(ANN), or other approaches could be considered to approximate existing FFT 
+algorithm.  
+
+From this project, depending on the chosen approximation approach, student
+would expect to learn C/C++ and python hybrid programming, concept of approximate 
+computing, image blur detection, and approximate arithmetic.  
+Students are also expected to gain capability of developing the software framework
+for approximate IBD and demonstrate the outcome compared to its original version."
+
+I think overall you had a good project description. You could use those comments 
+to improve your report at some point. 
+From now, I think you could consider starting project development. 
+Just let you be aware of these two repositories for blur detection using FFT:
+whdcumt/BlurDetection: A Python-Based Blur Detector using Fast Fourier 
+Transforms (github.com)
+Qengineering/Blur-detection-with-FFT-in-C: A blur detection with FFT written 
+in C (github.com) 

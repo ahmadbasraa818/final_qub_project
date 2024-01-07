@@ -1,18 +1,27 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 #include <complex> 
 #include <vector>
+#include <filesystem>
 using namespace std;
-const float pi = M_PI; 
-const float tau = 2*M_PI; 
-complex<float> j(0, 1);
+namespace fs = std::filesystem;
 
+const float pi = M_PI;  // Value of pi
+const float tau = 2*M_PI;  // Value of 2*pi
+complex<float> j(0, 1);  // Imaginary unit
+
+// Function for the Cooley-Tukey FFT algorithm
 void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
     int n;
-    if (limit == 0){n = a.size();}
-    else{n = limit;}
+    if (limit == 0) {
+        n = a.size();
+    } else {
+        n = limit;
+    }
 
+    // Bit-reversal permutation
     for (int i = 1, j = 0; i < n; i++) {
         int bit = n >> 1;
         for (; j & bit; bit >>= 1) {
@@ -23,8 +32,11 @@ void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
             swap(a[i], a[j]);
         }
     }
+
     complex<float> u;
     complex<float> v;
+
+    // FFT algorithm
     for (int len = 2; len <= n; len <<= 1) {
         float ang = 2 * pi / len * (invert ? -1 : 1);
         complex<float> wlen(cos(ang), sin(ang));
@@ -41,6 +53,7 @@ void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
         }
     }
 
+    // Scaling for inverse FFT
     if (invert) {
         for (int i = 0; i < n; i++) {
             a[i] /= n;
@@ -48,10 +61,11 @@ void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
     }
 }
 
-
-void fftblue(vector<complex<float>>& a,vector<complex<float>>& b, bool invert) {
-
+// Function for the Bluestein FFT algorithm
+void fftblue(vector<complex<float>>& a, vector<complex<float>>& b, bool invert) {
     int n = a.size();
+
+    // Bit-reversal permutation for two arrays
     for (int i = 1, j = 0; i < n; i++) {
         int bit = n >> 1;
         for (; j & bit; bit >>= 1) {
@@ -63,8 +77,11 @@ void fftblue(vector<complex<float>>& a,vector<complex<float>>& b, bool invert) {
             swap(b[i], b[j]);
         }
     }
+
     complex<float> u;
     complex<float> v;
+
+    // FFT algorithm for two arrays
     for (int len = 2; len <= n; len <<= 1) {
         float ang = 2 * pi / len * (invert ? -1 : 1);
         complex<float> wlen(cos(ang), sin(ang));
@@ -76,15 +93,23 @@ void fftblue(vector<complex<float>>& a,vector<complex<float>>& b, bool invert) {
                 v = a[i + j + len_o2] * w;
                 a[i + j] = u + v;
                 a[i + j + len_o2] = u - v;
+
                 u = b[i + j];
                 v = b[i + j + len_o2] * w;
                 b[i + j] = u + v;
-                b[i + j + len_o2] = u - v;                        
+                b[i + j + len_o2] = u - v;
+
                 w *= wlen;
             }
         }
     }
-    for (int i = 0; i < n; ++i){a[i]*=b[i];}
+
+    // Pointwise multiplication of the two arrays
+    for (int i = 0; i < n; ++i) {
+        a[i] *= b[i];
+    }
+
+    // Scaling for inverse FFT
     if (invert) {
         for (int i = 0; i < n; i++) {
             a[i] /= n;
@@ -92,45 +117,83 @@ void fftblue(vector<complex<float>>& a,vector<complex<float>>& b, bool invert) {
     }
 }
 
-class Bluestein
-{
-    public:
+// Class for Bluestein FFT implementation
+class Bluestein {
+public:
     int n;
     vector<complex<float>> dfft;
-    Bluestein( vector<float>& signal )
-    {
+
+    // Constructor
+    Bluestein(vector<float>& signal) {
         n = signal.size();
-        int l = pow(2,ceil(log2(2 * n + 1)));
+        int l = pow(2, ceil(log2(2 * n + 1)));
         float nInv = 1.0/n;
         complex<float> comp;
         float idx = 0.0;
         float onef = 1.0;
+
         vector<complex<float>> U_l(l);
         vector<complex<float>> V_l(l+1);
         vector<complex<float>> V_star(n);
-        for(int i = 0; i < n; i ++)
-        {
+
+        // Initializing vectors for Bluestein FFT
+        for (int i = 0; i < n; i++) {
             comp = exp(j*pi*(idx*idx)*nInv);
             V_star[i] = onef/comp;
             U_l[i] = signal[i]/comp;
             V_l[i] = comp;
             V_l[l-i] = comp;
             idx+=1.0;
-        }  
-        fftblue(U_l,V_l,false);
-        fft(U_l,true);
-        for(int i = 0; i < n; i ++){dfft.push_back(U_l[i]*V_star[i]);}
+        }
+
+        // Performing Bluestein FFT
+        fftblue(U_l, V_l, false);
+        fft(U_l, true);
+
+        // Pointwise multiplication with V_star
+        for (int i = 0; i < n; i++) {
+            dfft.push_back(U_l[i]*V_star[i]);
+        }
     }
-    vector<complex<float>> getFourCoeff(){ return dfft; } 
+
+    // Getter function for the result coefficients
+    vector<complex<float>> getFourCoeff() {
+        return dfft;
+    } 
 };
 
+int main() {
+    vector<string> imagenames;
+    string folderPath = "ImagesToTest"; // Replace with the actual path to your folder
 
-int main()
-{
-    vector<float> s = {1,2,3,4,5};
+    // Check if the folder exists
+    if (!fs::is_directory(folderPath)) {
+        cerr << "Error: The specified folder does not exist." << endl;
+        return 1;
+    }
+
+    // Read image names from the folder
+    for (const auto& entry : fs::directory_iterator(folderPath)) {
+        if (entry.is_regular_file()) {
+            imagenames.push_back(entry.path().filename().string());
+        }
+    }
+
+    // Sample blur information (replace with actual blur values if available)
+    vector<float> blurValues = {0.5, 0.8, 1.2, 0.3, 1.0};
+
+    vector<float> s = {1, 2, 3, 4, 5};
     Bluestein b2(s);
     vector<complex<float>> rst2 = b2.getFourCoeff();
+
+    // Printing the result coefficients with imagenames and blur information
+    cout << fixed << setprecision(6); // Set precision for floating-point output
+
     for (int i = 0; i < rst2.size(); i++) {
-        cout << rst2[i] << " ";
+        cout << "(" << imagenames[i] << "," << blurValues[i] << "," << rst2[i].real() << "," << rst2[i].imag() << ") ";
     }
+
+    cout << endl;
+
+    return 0;
 }
