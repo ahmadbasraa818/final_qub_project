@@ -8,6 +8,7 @@ import cv2
 import numpy
 import scripts  # Custom utility functions
 import FocusMask  # Custom module for creating a mask
+import matplotlib.pyplot as plt
 
 # Setting up logging
 logger = logging.getLogger('main')
@@ -120,7 +121,6 @@ if __name__ == '__main__':
 
     # Display the scatter plot of data in testing mode
     if args.display and args.testing:
-        import matplotlib.pyplot as plt
         logger.debug('x_okay: {0}'.format(x_okay))
         logger.debug('y_okay: {0}'.format(y_okay))
         logger.debug('x_blur: {0}'.format(x_blur))
