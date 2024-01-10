@@ -163,17 +163,21 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        cerr << "Usage: " << argv[0] << " <precision_level>" << endl;
-        return 1;
-    }
+    int precision;
 
-    int precision = stoi(argv[1]);
+    // Check if precision level is provided as a command-line argument
+    if (argc == 2) {
+        precision = stoi(argv[1]);
+    } else {
+        // Ask the user for the level of precision
+        cout << "Enter the level of precision (1 - 10): ";
+        cin >> precision;
 
-    // Validate the precision value
-    if (precision < 1 || precision > 10) {
-        cerr << "Error: Precision must be in the range 1 to 10." << endl;
-        return 1;
+        // Validate the precision value
+        if (precision < 1 || precision > 10) {
+            cerr << "Error: Precision must be in the range 1 to 10." << endl;
+            return 1;
+        }
     }
 
     // Set precision for floating-point output
@@ -217,3 +221,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+

@@ -110,19 +110,26 @@ def main():
     args['image_paths'] = drag_and_drop_gui.image_paths
     logger = get_logger(quiet=False, debug=False)
 
+    # Get the precision level from the user
+    precision = int(input("Enter the level of precision (1 - 10): "))
+
+    # Validate the precision value
+    if precision < 1 or precision > 10:
+        print("Error: Precision must be in the range 1 to 10.")
+        return
+
+    # Call the C++ executable with precision as input
+    command = ['./FocusMask', str(precision)]
+    subprocess.run(command, input='\n'.join(args['image_paths']), text=True)
+
     image_paths = args['image_paths']
 
     for path in image_paths:
         logger.debug(f'Evaluating {path}')
-        img = cv2.imread(path)
 
-        # Get the precision level from the user
-        precision = int(input("Enter the level of precision (1 - 10): "))
-
-        # Call the C++ executable with precision as input
-        command = ['./FocusMask', str(precision), path]
-        subprocess.run(command, text=True)
+        # Rest of your code...
 
 if __name__ == '__main__':
     main()
+
 
