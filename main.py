@@ -1,16 +1,15 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import logging, argparse, cv2, os, numpy, FocusMask, matplotlib.pyplot as plt, easygui, glob
+import logging
+import argparse
+import cv2
+import os
+import numpy
+import matplotlib.pyplot as plt
+import easygui
+import glob
 import subprocess
 
 logger = logging.getLogger('main')
-def run_cpp_executable(img_path):
-    # Path to the compiled C++ executable
-    cpp_executable = "./your_cpp_executable"  # Replace with the actual path to your compiled C++ executable
 
-    # Run the C++ executable with the image path as an argument
-    subprocess.run([cpp_executable, img_path])
 class DragAndDropGUI:
     def __init__(self):
         self.image_paths = []
@@ -104,7 +103,7 @@ def blur_detector(img_col, thresh=10, mask=False):
     else:
         return evaluate(img_col=img_col, args=args)
 
-if __name__ == '__main__':
+def main():
     args = {'image_paths': [], 'superpixel': True, 'thresh': 10, 'mask': True, 'display': True, 'debug': False, 'quiet': False, 'save': False, 'testing': False}
     drag_and_drop_gui = DragAndDropGUI()
     drag_and_drop_gui.drag_and_drop()
@@ -117,56 +116,13 @@ if __name__ == '__main__':
         logger.debug(f'Evaluating {path}')
         img = cv2.imread(path)
 
-        # Continue with your existing image processing logic...
+        # Get the precision level from the user
+        precision = int(input("Enter the level of precision (1 - 10): "))
 
-    x_okay, y_okay = [], []
-    x_blur, y_blur = [], []
+        # Call the C++ executable with precision as input
+        command = ['./FocusMask', str(precision), path]
+        subprocess.run(command, text=True)
 
-    for path in args['image_paths']:
-        for img_path in find_images(path):
-            logger.debug('evaluating {0}'.format(img_path))
-            img = cv2.imread(img_path)
+if __name__ == '__main__':
+    main()
 
-            if isinstance(img, numpy.ndarray):
-                if args['testing']:
-                    display('dialog (blurry: Y?)', img)
-                    blurry = False
-                    if cv2.waitKey(0) in map(lambda i: ord(i), ['Y', 'y']):
-                        blurry = True
-
-                    x_axis = [1, 3, 5, 7, 9]
-                    for x in x_axis:
-                        img_mod = cv2.GaussianBlur(img, (x, x), 0)
-                        y = evaluate(img_mod, args={'display': args['display'], 'testing': args['testing']})[0]
-                        if blurry:
-                            x_blur.append(x)
-                            y_blur.append(y)
-                        else:
-                            x_okay.append(x)
-                            y_okay.append(y)
-                elif args['mask']:
-                    msk, res, blurry = FocusMask.blur_mask(img)
-                    img_msk = cv2.bitwise_and(img, img, mask=msk)
-                    if args['display']:
-                        display('res', img_msk)
-                        display('msk', msk)
-                        display('img', img)
-                        cv2.waitKey(0)
-                else:
-                    img_fft, result, val = evaluate(img, args=args)
-                    logger.info('fft average of {0}'.format(result))
-
-                    if args['display']:
-                        display('input', img)
-                        display('img_fft', img_fft)
-                        cv2.waitKey(0)
-
-    if args['display'] and args['testing']:
-        logger.debug('x_okay: {0}'.format(x_okay))
-        logger.debug('y_okay: {0}'.format(y_okay))
-        logger.debug('x_blur: {0}'.format(x_blur))
-        logger.debug('y_blur: {0}'.format(y_blur))
-        plt.scatter(x_okay, y_okay, color='g')
-        plt.scatter(x_blur, y_blur, color='r')
-        plt.grid(True)
-        plt.show()

@@ -1,0 +1,39 @@
+# Target labels
+ Main
+ opencv_highgui
+ Module
+# Source files and their labels
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/include/opencv2/highgui.hpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/include/opencv2/highgui/highgui.hpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/include/opencv2/highgui/highgui_c.h
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/src/backend.cpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/src/window.cpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/src/roiSelector.cpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/src/window_gtk.cpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/opencv/modules/highgui/src/precomp.hpp
+ Main
+ opencv_highgui
+ Module
+/home/thatchaoskid/Desktop/final_qub_project/build/cvconfig.h
+/home/thatchaoskid/Desktop/final_qub_project/build/opencv2/opencv_modules.hpp
