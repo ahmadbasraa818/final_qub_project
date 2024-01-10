@@ -5,13 +5,64 @@
 import logging
 import argparse
 import cv2
+import os
 import numpy
-import scripts  # Custom utility functions
 import FocusMask  # Custom module for creating a mask
 import matplotlib.pyplot as plt
 
 # Setting up logging
 logger = logging.getLogger('main')
+
+def get_logger(level=logging.INFO, quite=False, debug=False, to_file=''):
+    assert level in [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL]
+    logger = logging.getLogger('main')
+    formatter = logging.Formatter('%(asctime)s - %(funcName)s - %(levelname)s - %(message)s')
+    if debug:
+        level = logging.DEBUG
+    logger.setLevel(level=level)
+    if not quite:
+        if to_file:
+            fh = logging.FileHandler(to_file)
+            fh.setLevel(level=level)
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+        else:
+            ch = logging.StreamHandler()
+            ch.setLevel(level=level)
+            ch.setFormatter(formatter)
+            logger.addHandler(ch)
+    return logger
+
+def find_images(path, recursive=True):
+    if os.path.isdir(path):
+        return list(xfind_images(path, recursive=recursive))
+    elif os.path.exists(path):
+        return [path]
+    else:
+        raise ValueError('path is not a valid path or directory')
+
+def xfind_images(directory, recursive=False, ignore=True):
+    assert os.path.isdir(directory), 'FileIO - get_images: Directory does not exist'
+    assert isinstance(recursive, bool), 'FileIO - get_images: recursive must be a boolean variable'
+    ext, result = ['png', 'jpg', 'jpeg'], []
+    for path_a in os.listdir(directory):
+        path_a = directory+'/'+path_a
+        if os.path.isdir(path_a) and recursive:
+            for path_b in xfind_images(path_a):
+                yield path_b
+        check_a = path_a.split('.')[-1] in ext
+        check_b = ignore or ('-' not in path_a.split('/')[-1])
+        if check_a and check_b:
+            yield path_a
+
+def display(title, img, max_size=200000):
+    assert isinstance(img, numpy.ndarray), 'img must be a numpy array'
+    assert isinstance(title, str), 'title must be a string'
+    scale = numpy.sqrt(min(1.0, float(max_size)/(img.shape[0]*img.shape[1])))
+    logger.debug('image is being scaled by a factor of {0}'.format(scale))
+    shape = (int(scale*img.shape[1]), int(scale*img.shape[0]))
+    img = cv2.resize(img, shape)
+    cv2.imshow(title, img)
 
 # Function to evaluate blur using FFT
 def evaluate(img_col, args):
@@ -36,8 +87,8 @@ def evaluate(img_col, args):
     # Display the results if specified
     if args.display and not args.testing:
         cv2.destroyAllWindows()
-        scripts.display('img_fft', img_fft)
-        scripts.display('img_col', img_col)
+        display('img_fft', img_fft)
+        display('img_col', img_col)
         cv2.waitKey(0)
 
     # Calculate the mean of the FFT result
@@ -52,8 +103,8 @@ def blur_detector(img_col, thresh=10, mask=False):
     assert img_col.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img_col.ndim)
 
     # Generate argument namespace
-    args = scripts.gen_args()
-    args.thresh = thresh
+    args = argparse.Namespace(image_paths=[], superpixel=False, thresh=thresh, mask=False, display=False, debug=False,
+                              quite=False, save=False, testing=False)
 
     # Either create a blur mask or evaluate blur using FFT
     if mask:
@@ -63,64 +114,65 @@ def blur_detector(img_col, thresh=10, mask=False):
 
 # Main script execution
 if __name__ == '__main__':
-    # Parse command-line arguments
-    args = scripts.get_args()
+    args = {
+        'image_paths': ["ImagesToTest"],  # Specify the path to your images
+        'superpixel': True,
+        'thresh': 10,
+        'mask': True,
+        'display': True,
+        'debug': False,
+        'quite': False,
+        'save': False,
+        'testing': False
+    }
 
     # Configure logging
-    logger = scripts.get_logger(quite=args.quite, debug=args.debug)
+    logger = get_logger(quite=args['quite'], debug=args['debug'])
 
     # Lists to store data for plotting in testing mode
     x_okay, y_okay = [], []
     x_blur, y_blur = [], []
 
-    # Iterate through specified image paths
-    for path in args.image_paths:
-        for img_path in scripts.find_images(path):
+    for path in args['image_paths']:
+        for img_path in find_images(path):
             logger.debug('evaluating {0}'.format(img_path))
             img = cv2.imread(img_path)
 
-            # Check if the read image is a valid numpy array
             if isinstance(img, numpy.ndarray):
-                if args.testing:
-                    # Allow the user to manually label images as blurry or not
-                    scripts.display('dialog (blurry: Y?)', img)
+                if args['testing']:
+                    display('dialog (blurry: Y?)', img)
                     blurry = False
                     if cv2.waitKey(0) in map(lambda i: ord(i), ['Y', 'y']):
                         blurry = True
 
-                    # For testing, apply blur and collect data for plotting
                     x_axis = [1, 3, 5, 7, 9]
                     for x in x_axis:
                         img_mod = cv2.GaussianBlur(img, (x, x), 0)
-                        y = evaluate(img_mod, args=args)[0]
+                        y = evaluate(img_mod, args={'display': args['display'], 'testing': args['testing']})[0]
                         if blurry:
                             x_blur.append(x)
                             y_blur.append(y)
                         else:
                             x_okay.append(x)
                             y_okay.append(y)
-                elif args.mask:
-                    # If mask is specified, create a blur mask and display images
+                elif args['mask']:
                     msk, res, blurry = FocusMask.blur_mask(img)
                     img_msk = cv2.bitwise_and(img, img, mask=msk)
-                    if args.display:
-                        scripts.display('res', img_msk)
-                        scripts.display('msk', msk)
-                        scripts.display('img', img)
+                    if args['display']:
+                        display('res', img_msk)
+                        display('msk', msk)
+                        display('img', img)
                         cv2.waitKey(0)
                 else:
-                    # Evaluate blur using FFT and log the result
                     img_fft, result, val = evaluate(img, args=args)
                     logger.info('fft average of {0}'.format(result))
 
-                    # Display the original and FFT images if specified
-                    if args.display:
-                        scripts.display('input', img)
-                        scripts.display('img_fft', img_fft)
+                    if args['display']:
+                        display('input', img)
+                        display('img_fft', img_fft)
                         cv2.waitKey(0)
 
-    # Display the scatter plot of data in testing mode
-    if args.display and args.testing:
+    if args['display'] and args['testing']:
         logger.debug('x_okay: {0}'.format(x_okay))
         logger.debug('y_okay: {0}'.format(y_okay))
         logger.debug('x_blur: {0}'.format(x_blur))

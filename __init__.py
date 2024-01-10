@@ -7,4 +7,3 @@
 
 from main import *
 from FocusMask import *
-import scripts

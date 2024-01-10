@@ -9,7 +9,7 @@ import skimage
 import skimage.measure
 import skimage.segmentation
 import main  # Importing the main module (containing blur_detector function)
-import scripts  # Custom utility functions
+
 
 # Setting up logging
 logger = logging.getLogger('main')
@@ -141,6 +141,6 @@ if __name__ == '__main__':
     msk, val = blur_mask(img)
     
     # Display the original image and the blur mask
-    scripts.display('img', img)
-    scripts.display('msk', msk)
+    main.display('img', img)
+    main.display('msk', msk)
     cv2.waitKey(0)
