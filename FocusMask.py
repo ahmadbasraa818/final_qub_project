@@ -35,30 +35,7 @@ def get_masks(img, n_seg=250):
 
 
 # Function to create a blur mask for the input image
-def blur_mask_old(img):
-    assert isinstance(img, numpy.ndarray), 'img_col must be a numpy array'
-    assert img.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img.ndim)
 
-    # Initialize a blank blur mask
-    blur_mask = numpy.zeros(img.shape[:2], dtype=numpy.uint8)
-
-    # Iterate through superpixel masks
-    for mask, loc in get_masks(img):
-        logger.debug('Checking Mask: {0}'.format(numpy.unique(mask)))
-        logger.debug('SuperPixel Mask Percentage: {0}%'.format(int((100.0/255.0)*(numpy.sum(mask)/mask.size))))
-
-        # Evaluate blur for the superpixel region
-        img_fft, val, blurry = main.blur_detector(img[loc[0]:loc[2], loc[1]:loc[3]])
-        logger.debug('Blurry: {0}'.format(blurry))
-
-        # If blurry, add the superpixel mask to the overall blur mask
-        if blurry:
-            blur_mask = cv2.add(blur_mask, mask)
-
-    # Calculate the percentage of the image that is blurry
-    result = numpy.sum(blur_mask)/(255.0*blur_mask.size)
-    logger.info('{0}% of input image is blurry'.format(int(100*result)))
-    return blur_mask, result
 
 
 # Function for morphological operations on a mask
@@ -131,8 +108,6 @@ def blur_mask(img):
 
 # Main script execution
 if __name__ == '__main__':
-    # Specify the path to the image
-    img_path = "/BlueDectection/demo.png"
     
     # Read the image
     img = cv2.imread(img_path)

@@ -1,199 +1,100 @@
 #include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <cmath>
-#include <complex> 
-#include <vector>
-#include <filesystem>
-using namespace std;
-namespace fs = std::filesystem;
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/slic/slic.hpp>
 
-const float pi = M_PI;  // Value of pi
-const float tau = 2*M_PI;  // Value of 2*pi
-complex<float> j(0, 1);  // Imaginary unit
+// Function to obtain superpixel masks using SLIC segmentation
+std::vector<cv::Mat> getMasks(const cv::Mat& img, int n_seg = 250) {
+    cv::Ptr<cv::ximgproc::SuperpixelSLIC> slic = cv::ximgproc::createSuperpixelSLIC(img, cv::ximgproc::SLIC, n_seg, 10.0f, 1.0f);
+    slic->iterate(10);
+    slic->getLabels(labels);
 
-// Function for the Cooley-Tukey FFT algorithm
-void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
-    int n;
-    if (limit == 0) {
-        n = a.size();
-    } else {
-        n = limit;
+    std::vector<cv::Mat> masks;
+    for (int i = 0; i < n_seg; ++i) {
+        cv::Mat mask = cv::Mat::zeros(img.size(), CV_8U);
+        cv::compare(labels, i, mask, cv::CMP_EQ);
+        masks.push_back(mask);
     }
 
-    // Bit-reversal permutation
-    for (int i = 1, j = 0; i < n; i++) {
-        int bit = n >> 1;
-        for (; j & bit; bit >>= 1) {
-            j ^= bit;
-        }
-        j ^= bit;
-        if (i < j) {
-            swap(a[i], a[j]);
-        }
-    }
-
-    complex<float> u;
-    complex<float> v;
-
-    // FFT algorithm
-    for (int len = 2; len <= n; len <<= 1) {
-        float ang = 2 * pi / len * (invert ? -1 : 1);
-        complex<float> wlen(cos(ang), sin(ang));
-        for (int i = 0; i < n; i += len) {
-            int len_o2 = len/2;
-            complex<float> w(1);
-            for (int j = 0; j < len_o2; j++) {
-                u = a[i + j];
-                v = a[i + j + len_o2] * w;
-                a[i + j] = u + v;
-                a[i + j + len_o2] = u - v;
-                w *= wlen;
-            }
-        }
-    }
-
-    // Scaling for inverse FFT
-    if (invert) {
-        for (int i = 0; i < n; i++) {
-            a[i] /= n;
-        }
-    }
+    return masks;
 }
 
-// Function for the Bluestein FFT algorithm
-void fftblue(vector<complex<float>>& a, vector<complex<float>>& b, bool invert) {
-    int n = a.size();
+// Function for morphological operations on a mask
+cv::Mat morphology(const cv::Mat& msk) {
+    assert(msk.type() == CV_8U, "msk must be a grayscale image");
 
-    // Bit-reversal permutation for two arrays
-    for (int i = 1, j = 0; i < n; i++) {
-        int bit = n >> 1;
-        for (; j & bit; bit >>= 1) {
-            j ^= bit;
-        }
-        j ^= bit;
-        if (i < j) {
-            swap(a[i], a[j]);
-            swap(b[i], b[j]);
-        }
-    }
+    // Erosion operation
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
+    cv::erode(msk, msk, kernel, cv::Point(-1, -1), 1);
 
-    complex<float> u;
-    complex<float> v;
+    // Closing operation
+    kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+    cv::morphologyEx(msk, msk, cv::MORPH_CLOSE, kernel);
 
-    // FFT algorithm for two arrays
-    for (int len = 2; len <= n; len <<= 1) {
-        float ang = 2 * pi / len * (invert ? -1 : 1);
-        complex<float> wlen(cos(ang), sin(ang));
-        for (int i = 0; i < n; i += len) {
-            int len_o2 = len/2;
-            complex<float> w(1);
-            for (int j = 0; j < len_o2; j++) {
-                u = a[i + j];
-                v = a[i + j + len_o2] * w;
-                a[i + j] = u + v;
-                a[i + j + len_o2] = u - v;
+    // Thresholding
+    cv::threshold(msk, msk, 128, 255, cv::THRESH_BINARY);
 
-                u = b[i + j];
-                v = b[i + j + len_o2] * w;
-                b[i + j] = u + v;
-                b[i + j + len_o2] = u - v;
-
-                w *= wlen;
-            }
-        }
-    }
-
-    // Pointwise multiplication of the two arrays
-    for (int i = 0; i < n; ++i) {
-        a[i] *= b[i];
-    }
-
-    // Scaling for inverse FFT
-    if (invert) {
-        for (int i = 0; i < n; i++) {
-            a[i] /= n;
-        }
-    }
+    return msk;
 }
 
-// Class for Bluestein FFT implementation
-class Bluestein {
-public:
-    int n;
-    vector<complex<float>> dfft;
+// Function to remove a border from a mask
+cv::Mat removeBorder(const cv::Mat& msk, int width = 50) {
+    assert(msk.type() == CV_8U, "msk must be a grayscale image");
 
-    // Constructor
-    Bluestein(vector<float>& signal) {
-        n = signal.size();
-        int l = pow(2, ceil(log2(2 * n + 1)));
-        float nInv = 1.0/n;
-        complex<float> comp;
-        float idx = 0.0;
-        float onef = 1.0;
+    cv::Mat result = msk.clone();
 
-        vector<complex<float>> U_l(l);
-        vector<complex<float>> V_l(l+1);
-        vector<complex<float>> V_star(n);
+    int dh = msk.rows / width;
+    int dw = msk.cols / width;
 
-        // Initializing vectors for Bluestein FFT
-        for (int i = 0; i < n; i++) {
-            comp = exp(j*pi*(idx*idx)*nInv);
-            V_star[i] = onef/comp;
-            U_l[i] = signal[i]/comp;
-            V_l[i] = comp;
-            V_l[l-i] = comp;
-            idx+=1.0;
-        }
+    // Set the top, bottom, left, and right borders to 255
+    result.rowRange(0, dh).setTo(cv::Scalar(255));
+    result.rowRange(result.rows - dh, result.rows).setTo(cv::Scalar(255));
+    result.colRange(0, dw).setTo(cv::Scalar(255));
+    result.colRange(result.cols - dw, result.cols).setTo(cv::Scalar(255));
 
-        // Performing Bluestein FFT
-        fftblue(U_l, V_l, false);
-        fft(U_l, true);
+    return result;
+}
 
-        // Pointwise multiplication with V_star
-        for (int i = 0; i < n; i++) {
-            dfft.push_back(U_l[i]*V_star[i]);
-        }
-    }
+// Function to create a blur mask with additional processing
+std::tuple<cv::Mat, double, bool> blurMask(const cv::Mat& img) {
+    assert(img.type() == CV_8UC3, "img_col must be a color image");
 
-    // Getter function for the result coefficients
-    vector<complex<float>> getFourCoeff() {
-        return dfft;
-    } 
-};
+    // Perform your initial blur detection here (not provided in the Python code)
+
+    cv::Mat msk, blurry;
+    double result;
+
+    // Invert the mask and adjust intensity levels
+    cv::convertScaleAbs(255 - (255 * msk / cv::norm(msk, cv::NORM_L2)));
+    cv::threshold(msk, msk, 50, 255, cv::THRESH_BINARY);
+    cv::threshold(msk, msk, 127, 255, cv::THRESH_BINARY_INV);
+
+    // Remove borders from the mask
+    msk = removeBorder(msk);
+
+    // Apply morphological operations
+    msk = morphology(msk);
+
+    // Calculate the percentage of the image that is blurry
+    result = static_cast<double>(cv::countNonZero(msk)) / (255.0 * msk.size());
+
+    std::cout << result * 100 << "% of input image is blurry" << std::endl;
+
+    return std::make_tuple(msk, result, blurry);
+}
 
 int main() {
-    vector<string> imagenames;
-    string folderPath = "ImagesToTest"; // Replace with the actual path to your folder
+    // Read the image
+    cv::Mat img = cv::imread("path/to/your/image.jpg");
+    
+    // Obtain the blur mask and its value
+    auto [msk, val, blurry] = blurMask(img);
 
-    // Check if the folder exists
-    if (!fs::is_directory(folderPath)) {
-        cerr << "Error: The specified folder does not exist." << endl;
-        return 1;
-    }
-
-    // Read image names from the folder
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
-        if (entry.is_regular_file()) {
-            imagenames.push_back(entry.path().filename().string());
-        }
-    }
-
-    // Sample blur information (replace with actual blur values if available)
-    vector<float> blurValues = {0.5, 0.8, 1.2, 0.3, 1.0};
-
-    vector<float> s = {1, 2, 3, 4, 5};
-    Bluestein b2(s);
-    vector<complex<float>> rst2 = b2.getFourCoeff();
-
-    // Printing the result coefficients with imagenames and blur information
-    cout << fixed << setprecision(6); // Set precision for floating-point output
-
-    for (int i = 0; i < rst2.size(); i++) {
-        cout << "(" << imagenames[i] << "," << blurValues[i] << "," << rst2[i].real() << "," << rst2[i].imag() << ") ";
-    }
-
-    cout << endl;
+    // Display the original image and the blur mask
+    cv::imshow("img", img);
+    cv::imshow("msk", msk);
+    cv::waitKey(0);
 
     return 0;
 }
