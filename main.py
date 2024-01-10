@@ -9,18 +9,32 @@ import os
 import numpy
 import FocusMask  # Custom module for creating a mask
 import matplotlib.pyplot as plt
+import easygui
+import glob
 
 # Setting up logging
 logger = logging.getLogger('main')
 
-def get_logger(level=logging.INFO, quite=False, debug=False, to_file=''):
+class DragAndDropGUI:
+    def __init__(self):
+        self.image_paths = []
+
+    def drag_and_drop(self):
+        message = "Drag and drop images to test blur"
+        image_paths = easygui.fileopenbox(msg=message, title="Image Blur Tester", default="*.png;*.jpg", multiple=True)
+
+        if image_paths is not None:
+            self.image_paths.extend(image_paths)
+            logger.info(f"Added image paths: {image_paths}")
+
+def get_logger(level=logging.INFO, quiet=False, debug=False, to_file=''):
     assert level in [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL]
     logger = logging.getLogger('main')
     formatter = logging.Formatter('%(asctime)s - %(funcName)s - %(levelname)s - %(message)s')
     if debug:
         level = logging.DEBUG
     logger.setLevel(level=level)
-    if not quite:
+    if not quiet:
         if to_file:
             fh = logging.FileHandler(to_file)
             fh.setLevel(level=level)
@@ -36,6 +50,9 @@ def get_logger(level=logging.INFO, quite=False, debug=False, to_file=''):
 def find_images(path, recursive=True):
     if os.path.isdir(path):
         return list(xfind_images(path, recursive=recursive))
+    elif '*' in path or '?' in path:
+        # Handle wildcards
+        return glob.glob(path)
     elif os.path.exists(path):
         return [path]
     else:
@@ -115,19 +132,33 @@ def blur_detector(img_col, thresh=10, mask=False):
 # Main script execution
 if __name__ == '__main__':
     args = {
-        'image_paths': ["ImagesToTest"],  # Specify the path to your images
+        'image_paths': [],  # Specify the path to your images
         'superpixel': True,
         'thresh': 10,
         'mask': True,
         'display': True,
         'debug': False,
-        'quite': False,
+        'quiet': False,
         'save': False,
         'testing': False
     }
 
     # Configure logging
-    logger = get_logger(quite=args['quite'], debug=args['debug'])
+    drag_and_drop_gui = DragAndDropGUI()
+    drag_and_drop_gui.drag_and_drop()
+    args['image_paths'] = drag_and_drop_gui.image_paths
+    logger = get_logger(quiet=False, debug=False)
+
+    # Access the list of image paths
+    image_paths = args['image_paths']
+
+    # Continue with your image processing logic using the obtained image paths.
+    # For example:
+    for path in image_paths:
+        logger.debug(f'Evaluating {path}')
+        img = cv2.imread(path)
+
+        # Continue with your existing image processing logic...
 
     # Lists to store data for plotting in testing mode
     x_okay, y_okay = [], []
