@@ -166,11 +166,13 @@ public:
 
 int main(int argc, char *argv[]) {
     int precision;
-    const string folderPath = argv[2]; 
+    const string folderPath = argv[2];  // Change to argv[1]
+
     cout << "FolderPath: " << folderPath << endl;
+
     // Check if precision level is provided as a command-line argument
     if (argc == 3) {
-        precision = stoi(argv[1]);
+        precision = stoi(argv[1]);  // Change to argv[2]
     } else {
         // Ask the user for the level of precision
         cout << "Enter the level of precision (1 - 10): ";
@@ -186,21 +188,17 @@ int main(int argc, char *argv[]) {
     // Set precision for floating-point output
     cout << fixed << setprecision(precision);
 
-
-
-
-
-
     // Check if the folder exists
     if (!fs::exists(folderPath)) {
-        cerr << "Error: The specified image file does not exist." << endl;
+        cerr << "Error: The specified folder does not exist." << endl;
         return 1;
     }
 
-    // Check if the file has a picture file extension
-    string extension = fs::path(folderPath).extension().string();
-    if (extension != ".jpg" && extension != ".png" && extension != ".jpeg") {
-        cerr << "Error: The specified file is not a supported image format." << endl;
+    const string targetFilePath = folderPath;
+
+    // Check if the file exists
+    if (!fs::exists(targetFilePath)) {
+        cerr << "Error: The specified file does not exist in the folder." << endl;
         return 1;
     }
 
@@ -211,18 +209,17 @@ int main(int argc, char *argv[]) {
     Bluestein b2(s);
     vector<complex<float>> rst2 = b2.getFourCoeff();
 
-    // Printing the result coefficients with imagenames and complement blur information in percentage format
-    for (int i = 0; i < rst2.size(); i++) {
-        // Convert the fraction to percentage and multiply by 100
-        float blurPercentage = blurValues[i] * 100.0;
-        
-        // Calculate the complement (100% - blur percentage)
-        float complementPercentage = 100.0 - blurPercentage;
-        
-        cout << "(" << folderPath[i] << "," << complementPercentage << "%," << rst2[i].real() << "," << rst2[i].imag() << ") ";
-    }
+    // Convert the fraction to percentage and multiply by 100
+    float blurPercentage = blurValues[0] * 100.0;
+
+    // Calculate the complement (100% - blur percentage)
+    float complementPercentage = 100.0 - blurPercentage;
+
+    // Printing the result coefficients with image names and complement blur information in percentage format
+    cout << "(" << targetFilePath << "," << complementPercentage << "%," << rst2[0].real() << "," << rst2[0].imag() << ") ";
 
     cout << endl;
 
     return 0;
 }
+

@@ -14,3 +14,18 @@ g++ -o your_cpp_executable FocusMask.cpp -I /usr/local/include/opencv4 -L/usr/lo
 
 1 = Not precisie
 10 = Very precisise
+
+================For the focus mask2 ======================
+
+g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+
+python3 main.py
+
+
+===============For the focus mask =======================
+
+g++ FocusMask2.cpp -o FocusMask2
+
+python3 main.py
+
+
