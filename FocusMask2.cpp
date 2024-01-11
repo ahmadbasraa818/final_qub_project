@@ -67,8 +67,6 @@ cv::Mat removeBorder(const cv::Mat& msk, int width = 50) {
 
 // Function to create a blur mask with additional processing
 std::tuple<cv::Mat, double, bool> blurMask(const cv::Mat& img) {
-    // Obtain the initial blur mask, its value, and the blur evaluation
-    // Replace the following line with the actual implementation of blurDetector function
     cv::Mat msk = img.clone();
     double val = 0.0;
     bool blurry = false;

@@ -8,7 +8,7 @@ import numpy
 import skimage
 import skimage.measure
 import skimage.segmentation
-import main  # Importing the main module (containing blur_detector function)
+import main  
 
 
 # Setting up logging
@@ -32,9 +32,6 @@ def get_masks(img, n_seg=250):
 
     logger.debug('contours extracted')
     return masks[1:]
-
-
-# Function to create a blur mask for the input image
 
 
 

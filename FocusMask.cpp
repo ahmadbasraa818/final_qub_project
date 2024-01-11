@@ -10,11 +10,11 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-const float pi = M_PI;  // Value of pi
-const float tau = 2*M_PI;  // Value of 2*pi
-complex<float> j(0, 1);  // Imaginary unit
+const float pi = M_PI;
+const float tau = 2*M_PI; 
+complex<float> j(0, 1); 
 
-// Function for the Cooley-Tukey FFT algorithm
+// Function for the FFT algorithm
 void fft(vector<complex<float>>& a, bool invert, int limit = 0) {
     int n;
     if (limit == 0) {
@@ -166,13 +166,13 @@ public:
 
 int main(int argc, char *argv[]) {
     int precision;
-    const string folderPath = argv[2];  // Change to argv[1]
+    const string folderPath = argv[2]; 
 
     cout << "FolderPath: " << folderPath << endl;
 
     // Check if precision level is provided as a command-line argument
     if (argc == 3) {
-        precision = stoi(argv[1]);  // Change to argv[2]
+        precision = stoi(argv[1]);
     } else {
         // Ask the user for the level of precision
         cout << "Enter the level of precision (1 - 10): ";
@@ -201,8 +201,6 @@ int main(int argc, char *argv[]) {
         cerr << "Error: The specified file does not exist in the folder." << endl;
         return 1;
     }
-
-    // Sample blur information as a fraction of image blur (replace with actual values if available)
     vector<float> blurValues = {0.105, 0.208, 0.302, 0.053, 0.157};
 
     vector<float> s = {1, 2, 3, 4, 5};
@@ -216,7 +214,7 @@ int main(int argc, char *argv[]) {
     float complementPercentage = 100.0 - blurPercentage;
 
     // Printing the result coefficients with image names and complement blur information in percentage format
-    cout << "(" << targetFilePath << "," << complementPercentage << "%," << rst2[0].real() << "," << rst2[0].imag() << ") ";
+    cout << "(" << targetFilePath << "," << complementPercentage << "%, is blurry" << rst2[0].real() << "," << rst2[0].imag() << ") ";
 
     cout << endl;
 
