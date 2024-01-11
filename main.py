@@ -16,7 +16,11 @@ class DragAndDropGUI:
 
     def drag_and_drop(self):
         message = "Drag and drop images to test blur"
-        self.image_paths.extend(easygui.fileopenbox(msg=message, title="Image Blur Tester", default="*.png;*.jpg", multiple=True) or [])
+        selected_paths = easygui.fileopenbox(msg=message, title="Image Blur Tester", default="*.png;*.jpg", multiple=True)
+        if selected_paths:
+            self.image_paths.extend(selected_paths[1:])  # Get only selected files, excluding the filter
+
+
 
 def get_logger(level=logging.INFO, quiet=False, debug=False, to_file=''):
     assert level in [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL]
@@ -108,6 +112,9 @@ def main():
     drag_and_drop_gui = DragAndDropGUI()
     drag_and_drop_gui.drag_and_drop()
     args['image_paths'] = drag_and_drop_gui.image_paths
+    if args['image_paths']:
+        pathFile = args['image_paths'][0]
+        print(pathFile)
     logger = get_logger(quiet=False, debug=False)
 
     # Get the precision level from the user
