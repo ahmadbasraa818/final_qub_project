@@ -2,6 +2,12 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <filesystem>
+#include <iostream>
+#include <vector>
+
+using namespace std;
 namespace fs = std::filesystem;
 
 std::vector<cv::Mat> getMasks(const cv::Mat& img) {
@@ -86,10 +92,23 @@ std::tuple<cv::Mat, double, bool> blurMask(const cv::Mat& img) {
     return std::make_tuple(processedMask, result, blurry);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Check if the correct number of command-line arguments is provided
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <file_path>" << endl;
+        return 1;
+    }
 
-    // Read the image
-    cv::Mat img = cv::imread("ImagesToTest/test2.jpg");
+    const string filePath = argv[1];
+
+    // Check if the file exists
+    if (!fs::exists(filePath)) {
+        cerr << "Error: The specified file does not exist." << endl;
+        return 1;
+    }
+
+    // Use the specified image file
+    cv::Mat img = cv::imread(filePath);
 
     // Obtain the blur mask and its value
     auto [msk, val, blurry] = blurMask(img);

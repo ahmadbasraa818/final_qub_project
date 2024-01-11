@@ -206,13 +206,15 @@ def main():
     args['image_paths'] = drag_and_drop_gui.image_paths
     if args['image_paths']:
         folder_path = os.path.dirname(args['image_paths'][0])
-        print("FolderPath:", folder_path)  # Optional: Print the folder path for debugging
 
         # Get the precision level from the user
         precision = int(input("Enter the level of precision (1 - 10): "))
 
-        command = ['./FocusMask2', str(precision)] + args['image_paths']
+        command = ['./FocusMask2'] + args['image_paths']
         subprocess.run(command, text=True)
+        command = ['./FocusMask', str(precision)] + args['image_paths']
+        subprocess.run(command, text=True)
+
 
         # Validate the precision value
         if precision < 1 or precision > 10:
@@ -224,16 +226,13 @@ def main():
             for img_path in find_images(path):
                 logger.debug('evaluating {0}'.format(img_path))
                 img = cv2.imread(img_path)
-
                 if isinstance(img, numpy.ndarray):
-                    print("1")
                     if args['testing']:
                         display('dialog (blurry: Y?)', img)
                         blurry = False
                         if cv2.waitKey(0) in map(lambda i: ord(i), ['Y', 'y']):
                             blurry = True
                     elif args['mask']:
-                        print('3')
                         msk, res, blurry = blur_mask(img)
                         img_msk = cv2.bitwise_and(img, img, mask=msk)
                         if args['display']:
