@@ -5,6 +5,8 @@
 #include <complex> 
 #include <vector>
 #include <filesystem>
+#include <cmath>
+#include <algorithm>
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -164,9 +166,10 @@ public:
 
 int main(int argc, char *argv[]) {
     int precision;
-
+    const string folderPath = argv[2]; 
+    cout << "FolderPath: " << folderPath << endl;
     // Check if precision level is provided as a command-line argument
-    if (argc == 2) {
+    if (argc == 3) {
         precision = stoi(argv[1]);
     } else {
         // Ask the user for the level of precision
@@ -183,20 +186,22 @@ int main(int argc, char *argv[]) {
     // Set precision for floating-point output
     cout << fixed << setprecision(precision);
 
-    vector<string> imagenames;
-    string folderPath = "ImagesToTest"; // Replace with the actual path to your folder
+
+
+
+
 
     // Check if the folder exists
-    if (!fs::is_directory(folderPath)) {
-        cerr << "Error: The specified folder does not exist." << endl;
+    if (!fs::exists(folderPath)) {
+        cerr << "Error: The specified image file does not exist." << endl;
         return 1;
     }
 
-    // Read image names from the folder
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
-        if (entry.is_regular_file()) {
-            imagenames.push_back(entry.path().filename().string());
-        }
+    // Check if the file has a picture file extension
+    string extension = fs::path(folderPath).extension().string();
+    if (extension != ".jpg" && extension != ".png" && extension != ".jpeg") {
+        cerr << "Error: The specified file is not a supported image format." << endl;
+        return 1;
     }
 
     // Sample blur information as a fraction of image blur (replace with actual values if available)
@@ -214,11 +219,10 @@ int main(int argc, char *argv[]) {
         // Calculate the complement (100% - blur percentage)
         float complementPercentage = 100.0 - blurPercentage;
         
-        cout << "(" << imagenames[i] << "," << complementPercentage << "%," << rst2[i].real() << "," << rst2[i].imag() << ") ";
+        cout << "(" << folderPath[i] << "," << complementPercentage << "%," << rst2[i].real() << "," << rst2[i].imag() << ") ";
     }
 
     cout << endl;
 
     return 0;
 }
-

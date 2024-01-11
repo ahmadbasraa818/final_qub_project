@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import easygui
 import glob
 import subprocess
+import skimage.segmentation
+import skimage.measure
 
 logger = logging.getLogger('main')
 
@@ -103,9 +105,99 @@ def blur_detector(img_col, thresh=10, mask=False):
                               quiet=False, save=False, testing=False)
 
     if mask:
-        return FocusMask.blur_mask(img)
+        return blur_mask(img)
     else:
         return evaluate(img_col=img_col, args=args)
+
+
+def get_masks(img, n_seg=250):
+    logger.debug('SLIC segmentation initialized')
+    # Perform SLIC segmentation on the image
+    segments = skimage.segmentation.slic(img, n_segments=n_seg, compactness=10, sigma=1)
+    logger.debug('SLIC segmentation complete')
+    logger.debug('contour extraction...')
+    masks = [[numpy.zeros((img.shape[0], img.shape[1]), dtype=numpy.uint8), None]]
+
+    # Iterate through superpixels and extract convex hull masks
+    for region in skimage.measure.regionprops(segments):
+        masks.append([masks[0][0].copy(), region.bbox])
+        x_min, y_min, x_max, y_max = region.bbox
+        masks[-1][0][x_min:x_max, y_min:y_max] = skimage.img_as_ubyte(region.convex_image)
+
+    logger.debug('contours extracted')
+    return masks[1:]
+
+
+# Function to create a blur mask for the input image
+
+
+
+# Function for morphological operations on a mask
+def morphology(msk):
+    assert isinstance(msk, numpy.ndarray), 'msk must be a numpy array'
+    assert msk.ndim == 2, 'msk must be a greyscale image'
+
+    # Erosion operation
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    msk = cv2.erode(msk, kernel, iterations=1)
+
+    # Closing operation
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    msk = cv2.morphologyEx(msk, cv2.MORPH_CLOSE, kernel)
+
+    # Thresholding
+    msk[msk < 128] = 0
+    msk[msk > 127] = 255
+
+    return msk
+
+
+# Function to remove a border from a mask
+def remove_border(msk, width=50):
+    assert isinstance(msk, numpy.ndarray), 'msk must be a numpy array'
+    assert msk.ndim == 2, 'msk must be a greyscale image'
+    
+    # Define border dimensions
+    dh, dw = map(lambda i: i//width, msk.shape)
+    h, w = msk.shape
+    
+    # Set the top, bottom, left, and right borders to 255
+    msk[:dh, :] = 255
+    msk[h-dh:, :] = 255
+    msk[:, :dw] = 255
+    msk[:, w-dw:] = 255
+
+    return msk
+
+
+# Function to create a blur mask with additional processing
+def blur_mask(img):
+    assert isinstance(img, numpy.ndarray), 'img_col must be a numpy array'
+    assert img.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img.ndim)
+
+    # Obtain the initial blur mask, its value, and the blur evaluation
+    msk, val, blurry = blur_detector(img)
+
+    logger.debug('inverting img_fft')
+    # Invert the mask and adjust intensity levels
+    msk = cv2.convertScaleAbs(255-(255*msk/numpy.max(msk)))
+    msk[msk < 50] = 0
+    msk[msk > 127] = 255
+
+    logger.debug('removing border')
+    # Remove borders from the mask
+    msk = remove_border(msk)
+
+    logger.debug('applying erosion and dilation operators')
+    # Apply morphological operations
+    msk = morphology(msk)
+
+    logger.debug('evaluation complete')
+    # Calculate the percentage of the image that is blurry
+    result = numpy.sum(msk)/(255.0*msk.size)
+    logger.info('{0}% of input image is blurry'.format(int(100*result)))
+
+    return msk, result, blurry
 
 def main():
     args = {'image_paths': [], 'superpixel': True, 'thresh': 10, 'mask': True, 'display': True, 'debug': False, 'quiet': False, 'save': False, 'testing': False}
@@ -113,28 +205,47 @@ def main():
     drag_and_drop_gui.drag_and_drop()
     args['image_paths'] = drag_and_drop_gui.image_paths
     if args['image_paths']:
-        pathFile = args['image_paths'][0]
-        print(pathFile)
-    logger = get_logger(quiet=False, debug=False)
+        folder_path = os.path.dirname(args['image_paths'][0])
+        print("FolderPath:", folder_path)  # Optional: Print the folder path for debugging
 
-    # Get the precision level from the user
-    precision = int(input("Enter the level of precision (1 - 10): "))
+        # Get the precision level from the user
+        precision = int(input("Enter the level of precision (1 - 10): "))
 
-    # Validate the precision value
-    if precision < 1 or precision > 10:
-        print("Error: Precision must be in the range 1 to 10.")
-        return
+        command = ['./FocusMask2', str(precision)] + args['image_paths']
+        subprocess.run(command, text=True)
 
-    # Call the C++ executable with precision as input
-    command = ['./FocusMask', str(precision)]
-    subprocess.run(command, input='\n'.join(args['image_paths']), text=True)
+        # Validate the precision value
+        if precision < 1 or precision > 10:
+            print("Error: Precision must be in the range 1 to 10.")
+            return
+             # Call the C++ executable with precision and image paths as inputs
+#=========================================================================================================#
+        for path in args['image_paths']:
+            for img_path in find_images(path):
+                logger.debug('evaluating {0}'.format(img_path))
+                img = cv2.imread(img_path)
 
+                if isinstance(img, numpy.ndarray):
+                    print("1")
+                    if args['testing']:
+                        display('dialog (blurry: Y?)', img)
+                        blurry = False
+                        if cv2.waitKey(0) in map(lambda i: ord(i), ['Y', 'y']):
+                            blurry = True
+                    elif args['mask']:
+                        print('3')
+                        msk, res, blurry = blur_mask(img)
+                        img_msk = cv2.bitwise_and(img, img, mask=msk)
+                        if args['display']:
+                            display('res', img_msk)
+                            display('msk', msk)
+                            display('img', img)
+                            cv2.waitKey(0)
+
+
+#=========================+++++++++==============================================================++#
     image_paths = args['image_paths']
 
-    for path in image_paths:
-        logger.debug(f'Evaluating {path}')
-
-        # Rest of your code...
 
 if __name__ == '__main__':
     main()
