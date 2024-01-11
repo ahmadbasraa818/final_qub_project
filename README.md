@@ -28,4 +28,7 @@ g++ FocusMask2.cpp -o FocusMask2
 
 python3 main.py
 
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+
 
