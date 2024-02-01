@@ -208,18 +208,16 @@ def main():
         folder_path = os.path.dirname(args['image_paths'][0])
 
         # Get the precision level from the user
-        precision = int(input("Enter the level of precision (1 - 10): "))
 
+        command = ['./FFT'] + args['image_paths']
+        subprocess.run(command, text=True)
         command = ['./FocusMask2'] + args['image_paths']
         subprocess.run(command, text=True)
-        command = ['./FocusMask', str(precision)] + args['image_paths']
+        command = ['./FocusMask'] + args['image_paths']
         subprocess.run(command, text=True)
 
 
         # Validate the precision value
-        if precision < 1 or precision > 10:
-            print("Error: Precision must be in the range 1 to 10.")
-            return
              # Call the C++ executable with precision and image paths as inputs
 #=========================================================================================================#
         for path in args['image_paths']:
