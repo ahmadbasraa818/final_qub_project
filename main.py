@@ -22,8 +22,6 @@ class DragAndDropGUI:
         if selected_paths:
             self.image_paths.extend(selected_paths[1:])  # Get only selected files, excluding the filter
 
-
-
 def get_logger(level=logging.INFO, quiet=False, debug=False, to_file=''):
     assert level in [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL]
     logger = logging.getLogger('main')
@@ -71,9 +69,7 @@ def display(title, img, max_size=200000):
     img = cv2.resize(img, shape)
     cv2.imshow(title, img)
 
-    
-
-def evaluate(img_col, args):
+def evaluate(img_col, args, block):
     numpy.seterr(all='ignore')
     assert isinstance(img_col, numpy.ndarray), 'img_col must be a numpy array'
     assert img_col.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img_col.ndim)
@@ -83,18 +79,12 @@ def evaluate(img_col, args):
     rows, cols = img_gry.shape
     crow, ccol = rows // 2, cols // 2
 
-
-    #Need to replace this part from FFT and send the data back from the cpp code Need to put this in the cpp
     f = numpy.fft.fft2(img_gry)
     fshift = numpy.fft.fftshift(f)
-    fshift[crow-75:crow+75, ccol-75:ccol+75] = 0
+    fshift[crow - block:crow + block, ccol - block:ccol + block] = 0
     f_ishift = numpy.fft.ifftshift(fshift)
     img_fft = numpy.fft.ifft2(f_ishift)
     img_fft = 20 * numpy.log(numpy.abs(img_fft))
-
-    command = ['./NewFFT']
-    subprocess.run(command, text=True)
-    #==============================================
 
     if args.display and not args.testing:
         cv2.destroyAllWindows()
@@ -105,7 +95,7 @@ def evaluate(img_col, args):
     result = numpy.mean(img_fft)
     return img_fft, result, result < args.thresh
 
-def blur_detector(img_col, thresh=10, mask=False):
+def blur_detector(img_col, thresh=10, mask=False, block=100):
     assert isinstance(img_col, numpy.ndarray), 'img_col must be a numpy array'
     assert img_col.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img_col.ndim)
 
@@ -115,8 +105,7 @@ def blur_detector(img_col, thresh=10, mask=False):
     if mask:
         return blur_mask(img)
     else:
-        return evaluate(img_col=img_col, args=args)
-
+        return evaluate(img_col=img_col, args=args, block=block)
 
 def get_masks(img, n_seg=250):
     logger.debug('SLIC segmentation initialized')
@@ -215,8 +204,11 @@ def main():
     if args['image_paths']:
         folder_path = os.path.dirname(args['image_paths'][0])
 
+        # Prompt user for BLOCK value
+        block = int(input("Enter the value of BLOCK: "))
+
         # Get the precision level from the user
-        command = ['./FocusMask2'] + args['image_paths']
+        command = ['./NewFFT', str(block)] + args['image_paths']
         subprocess.run(command, text=True)
 
 
@@ -249,5 +241,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

@@ -1,73 +1,99 @@
+#include <iostream>
 #include <opencv2/opencv.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
-#include <cmath>
 
 using namespace cv;
+using namespace std;
 
-std::tuple<Mat, Mat, Mat, Mat> processFFT(const Mat& img) {
-    Mat img_gry;
-    img.convertTo(img_gry, CV_32F);
-    
-    Mat f;
-    dft(img_gry, f, DFT_COMPLEX_OUTPUT);
+int main(int argc, char **argv) {
+    if (argc <= 2) {
+        fprintf(stderr, "Usage: %s <BLOCK> <image_file>\n", argv[0]);
+        return 1;
+    }
+    int block_size = atoi(argv[1]); // Convert the second argument to an integer (BLOCK size)
+    string image_file = argv[2];
 
-    Mat fshift;
-    fshift = Mat(f.size(), f.type());
-    int crow = f.rows / 2;
-    int ccol = f.cols / 2;
-    int d = 75; // Size of the rectangular region to be zeroed
-    
+    cout << "Processing " << image_file << std::endl;
+    Mat frame = imread(image_file, IMREAD_GRAYSCALE);
 
-    f(Rect(ccol - d/2, crow - d/2, d, d)) = Scalar::all(0);
+    int cx = frame.cols/2;
+    int cy = frame.rows/2;
 
-    // Shift the zero frequency component back to the original position
-    int cx = f.cols / 2;
-    int cy = f.rows / 2;
-    Mat q0(f, Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
-    Mat q1(f, Rect(cx, 0, cx, cy));  // Top-Right
-    Mat q2(f, Rect(0, cy, cx, cy));  // Bottom-Left
-    Mat q3(f, Rect(cx, cy, cx, cy)); // Bottom-Right
+    // Go float
+    Mat fImage;
+    frame.convertTo(fImage, CV_32F);
 
-    Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
+    // FFT
+    cout << "Direct transform...\n";
+    Mat fourierTransform;
+    dft(fImage, fourierTransform, DFT_SCALE|DFT_COMPLEX_OUTPUT);
+
+    //center low frequencies in the middle
+    //by shuffling the quadrants.
+    Mat q0(fourierTransform, Rect(0, 0, cx, cy));       // Top-Left - Create a ROI per quadrant
+    Mat q1(fourierTransform, Rect(cx, 0, cx, cy));      // Top-Right
+    Mat q2(fourierTransform, Rect(0, cy, cx, cy));      // Bottom-Left
+    Mat q3(fourierTransform, Rect(cx, cy, cx, cy));     // Bottom-Right
+
+    Mat tmp;                                            // swap quadrants (Top-Left with Bottom-Right)
     q0.copyTo(tmp);
     q3.copyTo(q0);
     tmp.copyTo(q3);
 
-    q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    q1.copyTo(tmp);                                     // swap quadrant (Top-Right with Bottom-Left)
     q2.copyTo(q1);
     tmp.copyTo(q2);
 
-    Mat f_ishift;
-    idft(f, f_ishift, DFT_REAL_OUTPUT | DFT_SCALE);
+    // Block the low frequencies
+    fourierTransform(Rect(cx-block_size, cy-block_size, 2*block_size, 2*block_size)).setTo(0);
 
-    Mat img_fft;
-    f_ishift.convertTo(img_fft, CV_8U);
+    //shuffle the quadrants to their original position
+    Mat orgFFT;
+    fourierTransform.copyTo(orgFFT);
+    Mat p0(orgFFT, Rect(0, 0, cx, cy));       // Top-Left - Create a ROI per quadrant
+    Mat p1(orgFFT, Rect(cx, 0, cx, cy));      // Top-Right
+    Mat p2(orgFFT, Rect(0, cy, cx, cy));      // Bottom-Left
+    Mat p3(orgFFT, Rect(cx, cy, cx, cy));     // Bottom-Right
 
-    // Calculate the magnitude spectrum
-    Mat planes[] = {Mat::zeros(f.size(), CV_32F), Mat::zeros(f.size(), CV_32F)};
-    split(f, planes);
-    magnitude(planes[0], planes[1], planes[0]);
-    Mat mag_spectrum = planes[0];
+    p0.copyTo(tmp);
+    p3.copyTo(p0);
+    tmp.copyTo(p3);
 
-    return std::make_tuple(fshift, f_ishift, img_fft, mag_spectrum);
-}
+    p1.copyTo(tmp);                                     // swap quadrant (Top-Right with Bottom-Left)
+    p2.copyTo(p1);
+    tmp.copyTo(p2);
 
-int main() {
-    Mat img = imread("image.jpg", IMREAD_GRAYSCALE);
-    if (img.empty()) {
-        std::cerr << "Error: Image not found!\n";
-        return -1;
+    // IFFT
+    cout << "Inverse transform...\n";
+    Mat invFFT;
+    Mat logFFT;
+    double minVal,maxVal;
+
+    dft(orgFFT, invFFT, DFT_INVERSE|DFT_REAL_OUTPUT);
+
+    //img_fft = 20*numpy.log(numpy.abs(img_fft))
+    invFFT = cv::abs(invFFT);
+    cv::minMaxLoc(invFFT,&minVal,&maxVal,NULL,NULL);
+    
+    //check for impossible values
+    if(maxVal<=0.0){
+        cerr << "No information, complete black image!\n";
+        return 1;
     }
 
-    Mat fshift, f_ishift, img_fft, mag_spectrum;
-    std::tie(fshift, f_ishift, img_fft, mag_spectrum) = processFFT(img);
+    cv::log(invFFT,logFFT);
+    logFFT *= 20;
 
-    // Display your results or do further processing
-    imshow("FFT Shifted Image", img_fft);
-    imshow("Magnitude Spectrum", mag_spectrum);
-    waitKey(0);
+    //result = numpy.mean(img_fft)
+    cv::Scalar result= cv::mean(logFFT);
+    cout << "Result : "<< result.val[0] << endl;
+
+    // show if you like
+    Mat finalImage;
+    logFFT.convertTo(finalImage, CV_8U);    // Back to 8-bits
+    imshow("Input", frame);
+    imshow("Result", finalImage);  //Higher value = sharper image
+    cv::waitKey();
+    // end show if you like
 
     return 0;
 }
