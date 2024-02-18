@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char **argv) {
     if (argc <= 2) {
-        fprintf(stderr, "Usage: %s <BLOCK> <image_file>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <BLOCK> <image_file>\n", argv[0]); //Each blcok is set to 60 pizels inclease = more precise
         return 1;
     }
     int block_size = atoi(argv[1]); // Convert the second argument to an integer (BLOCK size)
@@ -87,13 +87,28 @@ int main(int argc, char **argv) {
     cv::Scalar result= cv::mean(logFFT);
     cout << "Result : "<< result.val[0] << endl;
 
-    // show if you like
     Mat finalImage;
     logFFT.convertTo(finalImage, CV_8U);    // Back to 8-bits
     imshow("Input", frame);
-    imshow("Result", finalImage);  //Higher value = sharper image
+    imshow("Result", finalImage);  //Higher value = sharper image  level of blur present in image 
     cv::waitKey();
-    // end show if you like
 
     return 0;
 }
+
+    // What this does
+    // 1. Includes necessary libraries and namespaces: iostream, opencv2/opencv.hpp.
+    // 2. Defines a constant BLOCK which is used to set the size of the block for blocking low frequencies.
+    // 3. The main function takes the input image file path as a command-line argument.
+    // 4. Reads the input image in grayscale.
+    // 5. Converts the image to float.
+    // 6. Performs the FFT (forward DFT) on the float image.
+    // 7. Shifts the zero frequency component to the center of the spectrum.
+    // 8. Blocks low frequencies by setting a portion of the spectrum to zero.
+    // 9. Shifts the spectrum back to its original quadrant arrangement.
+    // 10. Performs the inverse FFT (inverse DFT) to obtain the spatial domain image.
+    // 11. Computes the logarithm of the absolute value of the inverse FFT result and scales it by 20.
+    // 12. Calculates the mean value of the logarithmic magnitude spectrum.
+    // 13. Converts the logarithmic magnitude spectrum to 8-bit for visualization.
+    // 14. Displays the original grayscale image and the result of the blur detection.
+    // 15. Waits for a key press to close the windows and end the program.

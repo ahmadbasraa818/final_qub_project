@@ -205,12 +205,16 @@ def main():
         folder_path = os.path.dirname(args['image_paths'][0])
 
         # Prompt user for BLOCK value
-        block = int(input("Enter the value of BLOCK: "))
+        block = int(input("Enter the value of BLOCK (0 - 100): "))
+        
+        print("press q to quit the windows")
+        key = cv2.waitKey(0) & 0xFF  # Wait indefinitely for a key press
+        if key == ord('q'):  # Check if the pressed key is 'q'
+            cv2.destroyAllWindows()  # Close all OpenCV windows
 
         # Get the precision level from the user
         command = ['./NewFFT', str(block)] + args['image_paths']
         subprocess.run(command, text=True)
-
 
         # Validate the precision value
              # Call the C++ executable with precision and image paths as inputs
