@@ -6,6 +6,10 @@
 #include <filesystem>
 #include <iostream>
 #include <vector>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -90,31 +94,64 @@ std::tuple<cv::Mat, double, bool> blurMask(const cv::Mat& img) {
     return std::make_tuple(processedMask, result, blurry);
 }
 
-int main(int argc, char* argv[]) {
-    // Check if the correct number of command-line arguments is provided
-    if (argc != 2) {
-        cerr << "Usage: " << argv[0] << " <file_path>" << endl;
+int main() {
+    // Create a socket
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket < 0) {
+        std::cerr << "Error creating socket\n";
         return 1;
     }
 
-    const string filePath = argv[1];
-
-    // Check if the file exists
-    if (!fs::exists(filePath)) {
-        cerr << "Error: The specified file does not exist." << endl;
+    // Bind the socket to localhost and a port
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(12345); // Port number
+    if (bind(server_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        std::cerr << "Error binding socket\n";
         return 1;
     }
 
-    // Use the specified image file
-    cv::Mat img = cv::imread(filePath);
+    // Listen for incoming connections
+    if (listen(server_socket, 5) < 0) {
+        std::cerr << "Error listening on socket\n";
+        return 1;
+    }
 
-    // Obtain the blur mask and its value
-    auto [msk, val, blurry] = blurMask(img);
+    while (true) {
+        // Accept incoming connection
+        int client_socket = accept(server_socket, NULL, NULL);
+        if (client_socket < 0) {
+            std::cerr << "Error accepting connection\n";
+            return 1;
+        }
 
-    // Display the original image and the blur mask
-    cv::imshow("img", img);
-    cv::imshow("msk", msk);
-    cv::waitKey(0);
+        // Receive image data from Python client
+        cv::Mat img;
+        int img_size;
+        recv(client_socket, &img_size, sizeof(int), 0);
+        std::vector<uchar> buffer(img_size);
+        recv(client_socket, buffer.data(), img_size, 0);
+        img = cv::imdecode(buffer, cv::IMREAD_COLOR);
+
+        // Process the received image
+        auto [msk, val, blurry] = blurMask(img);
+
+        // Serialize the mask
+        std::vector<uchar> serialized_mask;
+        cv::imencode(".jpg", msk, serialized_mask);
+
+        // Send the serialized mask back to the Python client
+        int mask_size = serialized_mask.size();
+        send(client_socket, &mask_size, sizeof(int), 0);
+        send(client_socket, serialized_mask.data(), mask_size, 0);
+
+        // Close the client socket
+        close(client_socket);
+    }
+
+    // Close the server socket (this will not be reached in this code)
+    close(server_socket);
 
     return 0;
 }

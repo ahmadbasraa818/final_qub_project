@@ -71,6 +71,8 @@ def display(title, img, max_size=200000):
     img = cv2.resize(img, shape)
     cv2.imshow(title, img)
 
+    
+
 def evaluate(img_col, args):
     numpy.seterr(all='ignore')
     assert isinstance(img_col, numpy.ndarray), 'img_col must be a numpy array'
@@ -81,12 +83,18 @@ def evaluate(img_col, args):
     rows, cols = img_gry.shape
     crow, ccol = rows // 2, cols // 2
 
+
+    #Need to replace this part from FFT and send the data back from the cpp code Need to put this in the cpp
     f = numpy.fft.fft2(img_gry)
     fshift = numpy.fft.fftshift(f)
     fshift[crow-75:crow+75, ccol-75:ccol+75] = 0
     f_ishift = numpy.fft.ifftshift(fshift)
     img_fft = numpy.fft.ifft2(f_ishift)
     img_fft = 20 * numpy.log(numpy.abs(img_fft))
+
+    command = ['./NewFFT']
+    subprocess.run(command, text=True)
+    #==============================================
 
     if args.display and not args.testing:
         cv2.destroyAllWindows()
@@ -208,12 +216,7 @@ def main():
         folder_path = os.path.dirname(args['image_paths'][0])
 
         # Get the precision level from the user
-
-        command = ['./FFT'] + args['image_paths']
-        subprocess.run(command, text=True)
         command = ['./FocusMask2'] + args['image_paths']
-        subprocess.run(command, text=True)
-        command = ['./FocusMask'] + args['image_paths']
         subprocess.run(command, text=True)
 
 
