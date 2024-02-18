@@ -213,6 +213,7 @@ def main():
             cv2.destroyAllWindows()  # Close all OpenCV windows
 
         # Get the precision level from the user
+        print(args['image_paths'])
         command = ['./NewFFT', str(block)] + args['image_paths']
         subprocess.run(command, text=True)
 
