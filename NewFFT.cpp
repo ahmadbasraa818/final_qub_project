@@ -108,8 +108,14 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Perform FFT
-    fft(image_data, false);
+    // Perform IFFT
+    fft(image_data, true);
+
+    // Scale the inverse FFT output
+    for (int i = 0; i < image_data.size(); ++i) {
+        image_data[i].real /= image_data.size();
+        image_data[i].imag /= image_data.size();
+    }
 
     // Detect blur
     bool blurry = isBlurry(image_data);
