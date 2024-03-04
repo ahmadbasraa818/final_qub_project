@@ -85,17 +85,29 @@ void fft(vector<MyComplex> &a, bool inverse) {
 }
 
 int main(int argc, char **argv) {
-    if (argc <= 2) {
-        fprintf(stderr, "Usage: %s <BLOCK> <image_file>\n", argv[0]);
-        return 1;
-    }
+// Check if the number of command line arguments is correct
+if (argc != 2) {
+    fprintf(stderr, "Usage: %s <image_file>\n", argv[0]);
+    return 1;
+}
+string image_file = argv[1]; 
+cout << "Processing " << image_file << std::endl;
+int block_size;
+std::cout << "Enter the block size: ";
+std::cin >> block_size;
 
-    int block_size = atoi(argv[1]);
-    string image_file = argv[2];
 
-    cout << "Processing " << image_file << std::endl;
-    
-    Mat frame = imread(image_file, IMREAD_GRAYSCALE);
+
+
+
+Mat frame = imread(image_file, IMREAD_GRAYSCALE);
+
+// Check if the image is loaded successfully
+if (frame.empty()) {
+    cerr << "Error: Unable to load image: " << image_file << endl;
+    return 1;
+}
+
 
     int cx = frame.cols/2;
     int cy = frame.rows/2;

@@ -214,7 +214,7 @@ def main():
 
         # Get the precision level from the user
         print(args['image_paths'])
-        command = ['./NewFFT', str(block)] + args['image_paths']
+        command = ['./NewFFT'] + args['image_paths']
         subprocess.run(command, text=True)
 
         # Validate the precision value
