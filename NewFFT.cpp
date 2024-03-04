@@ -2,29 +2,13 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
+#include <floatx.hpp>
 
 using namespace std;
 using namespace cv;
 
-// Complex number structure
-struct MyComplex {
-    double real, imag;
-    MyComplex() : real(0.0), imag(0.0) {}
-    MyComplex(int r, int i) : real(r), imag(i) {}
 
-    MyComplex operator+(const MyComplex& other) const {
-        return MyComplex(real + other.real, imag + other.imag);
-    }
-
-    MyComplex operator-(const MyComplex& other) const {
-        return MyComplex(real - other.real, imag - other.imag);
-    }
-
-    MyComplex operator*(const MyComplex& other) const {
-        return MyComplex(real * other.real - imag * other.imag,
-                         real * other.imag + imag * other.real);
-    }
-};
+using MyComplex = floatx::floatx<23>; // This is where the precision would be
 
 // FFT function declaration
 void fft(vector<MyComplex> &a, bool inverse);
@@ -32,18 +16,18 @@ void fft(vector<MyComplex> &a, bool inverse);
 // Blur detection function
 bool isBlurry(vector<MyComplex> &freqData) {
     // Calculate average magnitude of frequency components
-    double sumMagnitude = 0.0;
+    MyComplex sumMagnitude = 0.0;
     for (const auto& c : freqData) {
-        sumMagnitude += sqrt(c.real * c.real + c.imag * c.imag);
+        sumMagnitude += sqrt(c.real() * c.real() + c.imag() * c.imag());
     }
-    double averageMagnitude = sumMagnitude / freqData.size();
+    MyComplex averageMagnitude = sumMagnitude / freqData.size();
 
     // Calculate average magnitude of high-frequency components (excluding DC component)
-    double sumHighMagnitude = 0.0;
+    MyComplex sumHighMagnitude = 0.0;
     for (size_t i = 1; i < freqData.size(); ++i) {
-        sumHighMagnitude += sqrt(freqData[i].real * freqData[i].real + freqData[i].imag * freqData[i].imag);
+        sumHighMagnitude += sqrt(freqData[i].real() * freqData[i].real() + freqData[i].imag() * freqData[i].imag());
     }
-    double averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
+    MyComplex averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
 
     // Set a threshold ratio (you may need to adjust this value)
     double thresholdRatio = 0.2;
@@ -75,39 +59,33 @@ void fft(vector<MyComplex> &a, bool inverse) {
         a[k] = a0[k] + t;
         a[k + n / 2] = a0[k] - t;
         if (inverse) {
-            a[k].real /= 2;
-            a[k].imag /= 2;
-            a[k + n / 2].real /= 2;
-            a[k + n / 2].imag /= 2;
+            a[k] /= 2;
+            a[k + n / 2] /= 2;
         }
-        w = w * wn;
+        w *= wn;
     }
 }
 
 int main(int argc, char **argv) {
-// Check if the number of command line arguments is correct
-if (argc != 2) {
-    fprintf(stderr, "Usage: %s <image_file>\n", argv[0]);
-    return 1;
-}
-string image_file = argv[1]; 
-cout << "Processing " << image_file << std::endl;
-int block_size;
-std::cout << "Enter the block size: ";
-std::cin >> block_size;
+    // Check if the number of command line arguments is correct
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <image_file>\n", argv[0]);
+        return 1;
+    }
+    string image_file = argv[1]; 
+    cout << "Processing " << image_file << std::endl;
+    int block_size;
+    std::cout << "Enter the block size: ";
+    std::cin >> block_size;
 
+    // Load the image
+    Mat frame = imread(image_file, IMREAD_GRAYSCALE);
 
-
-
-
-Mat frame = imread(image_file, IMREAD_GRAYSCALE);
-
-// Check if the image is loaded successfully
-if (frame.empty()) {
-    cerr << "Error: Unable to load image: " << image_file << endl;
-    return 1;
-}
-
+    // Check if the image is loaded successfully
+    if (frame.empty()) {
+        cerr << "Error: Unable to load image: " << image_file << endl;
+        return 1;
+    }
 
     int cx = frame.cols/2;
     int cy = frame.rows/2;
@@ -125,8 +103,7 @@ if (frame.empty()) {
 
     // Scale the inverse FFT output
     for (int i = 0; i < image_data.size(); ++i) {
-        image_data[i].real /= image_data.size();
-        image_data[i].imag /= image_data.size();
+        image_data[i] /= image_data.size();
     }
 
     // Detect blur
@@ -134,7 +111,7 @@ if (frame.empty()) {
 
     cout << "Blurry: " << (blurry ? "Yes" : "No") << endl;
 
-    // Perform IFFT
+    // Perform IFFT (not sure if this is intended)
     fft(image_data, true);
 
     // Convert Complex vector back to image
@@ -142,7 +119,7 @@ if (frame.empty()) {
     for (int y = 0; y < frame.rows; ++y) {
         for (int x = 0; x < frame.cols; ++x) {
             // Take real part of complex number and cast to uchar
-            result.at<uchar>(y, x) = static_cast<uchar>(image_data[y * frame.cols + x].real);
+            result.at<uchar>(y, x) = static_cast<uchar>(image_data[y * frame.cols + x].real());
         }
     }
 

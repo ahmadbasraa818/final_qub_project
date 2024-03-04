@@ -17,7 +17,10 @@ g++ -o your_cpp_executable FocusMask.cpp -I /usr/local/include/opencv4 -L/usr/lo
 
 ================For the focus mask2 ======================
 
-g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -L/usr/local/includez -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+
+g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -I/usr/local/include -L/usr/local/lib -L/usr/local/include -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lfloatx
+
 
 python3 main.py
 
