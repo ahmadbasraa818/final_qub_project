@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
+#include <floatx.hpp>
 
 using namespace std;
 using namespace cv;
@@ -62,10 +63,7 @@ int nextPowerOfTwo(int n) {
 
 
 // FFT function definition
-void fft(vector<MyComplex> &a, bool inverse);
-
-// Adjusted FFT function
-void fft(vector<MyComplex>& a, bool inverse) {
+void fft(vector<MyComplex>& a, bool inverse = false) {
     cout << "FFT call with vector size: " << a.size() << "\n";
     
     int n = a.size();
@@ -76,7 +74,10 @@ void fft(vector<MyComplex>& a, bool inverse) {
         n = newSize;
     }
 
-    if (n <= 1) return;
+    if (n <= 1) {
+        cout << "Completed FFT for vector size: " << n << " (base case)\n";
+        return;
+    }
 
     vector<MyComplex> a_even(n / 2), a_odd(n / 2);
     for (int i = 0; i < n / 2; i++) {
@@ -104,74 +105,79 @@ void fft(vector<MyComplex>& a, bool inverse) {
     cout << "Completed FFT for vector size: " << n << "\n";
 }
 
-
-int main(int argc, char **argv) {
-// Check if the number of command line arguments is correct
-if (argc != 2) {
-    fprintf(stderr, "Usage: %s <image_file>\n", argv[0]);
-    return 1;
-}
-string image_file = argv[1]; 
-cout << "Processing " << image_file << std::endl;
-int block_size;
-std::cout << "Enter the block size: ";
-std::cin >> block_size;
-
-
-
-
-
-Mat frame = imread(image_file, IMREAD_GRAYSCALE);
-
-// Check if the image is loaded successfully
-if (frame.empty()) {
-    cerr << "Error: Unable to load image: " << image_file << endl;
-    return 1;
+Mat recombineBlocks(const vector<Mat>& blocks, int rows, int cols, int blockSize) {
+    Mat output = Mat::zeros(rows, cols, CV_8U); // Initialize the output image
+    int index = 0;
+    for (int y = 0; y < rows; y += blockSize) {
+        for (int x = 0; x < cols; x += blockSize) {
+            // Ensure we don't exceed the image bounds
+            int actualBlockSizeY = min(blockSize, rows - y);
+            int actualBlockSizeX = min(blockSize, cols - x);
+            Mat block = blocks[index++](Rect(0, 0, actualBlockSizeX, actualBlockSizeY));
+            block.copyTo(output(Rect(x, y, actualBlockSizeX, actualBlockSizeY)));
+        }
+    }
+    return output;
 }
 
 
-    int cx = frame.cols/2;
-    int cy = frame.rows/2;
-
-    // Convert image to vector of Complex numbers
-    vector<MyComplex> image_data(frame.cols * frame.rows);
-    for (int y = 0; y < frame.rows; ++y) {
-        for (int x = 0; x < frame.cols; ++x) {
-            image_data[y * frame.cols + x] = MyComplex(frame.at<uchar>(y, x), 0);
-        }
-    }
-    cout << "1" << endl;
-     // Perform IFFT
-    fft(image_data, false);
-
-    // Scale the inverse FFT output
-    for (int i = 0; i < image_data.size(); ++i) {
-        image_data[i].real /= image_data.size();
-        image_data[i].imag /= image_data.size();
-    }
-
-    // Detect blur
-     bool blurry = isBlurry(image_data);
-
-    cout << "Blurry: " << (blurry ? "Yes" : "No") << endl;
-
-
-    // Perform IFFT
-    fft(image_data, true);
-
-    // Convert Complex vector back to image
-    Mat result(frame.size(), CV_8UC1);
-    for (int y = 0; y < frame.rows; ++y) {
-        for (int x = 0; x < frame.cols; ++x) {
-            // Take real part of complex number and cast to uchar
-            result.at<uchar>(y, x) = static_cast<uchar>(image_data[y * frame.cols + x].real);
+Mat processBlock(const Mat& block) {
+    vector<MyComplex> blockData;
+    for (int y = 0; y < block.rows; ++y) {
+        for (int x = 0; x < block.cols; ++x) {
+            blockData.push_back(MyComplex(block.at<uchar>(y, x), 0));
         }
     }
 
-    // Display results
-    imshow("Input", frame);
+    fft(blockData, false);
+    return block.clone();
+}
+
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <image_file>" << endl;
+        return 1;
+    }
+    string image_file = argv[1];
+    cout << "Processing " << image_file << endl;
+
+    Mat frame = imread(image_file, IMREAD_GRAYSCALE);
+    if (frame.empty()) {
+        cerr << "Error: Unable to load image " << image_file << endl;
+        return 1;
+    }
+
+    vector<Mat> processedBlocks;
+    int minBlockSize = 1;
+    int maxBlockSize = min(frame.cols, frame.rows);
+    int defaultBlockSize = minBlockSize;
+
+    cout << "Enter the block size (" << minBlockSize << " - " << maxBlockSize << "): ";
+    int blockSize;
+    cin >> blockSize;
+
+    if (blockSize < minBlockSize || blockSize > maxBlockSize) {
+        cerr << "Invalid block size. Using default size: " << defaultBlockSize << endl;
+        blockSize = defaultBlockSize;
+    }
+
+    blockSize = nextPowerOfTwo(blockSize);
+
+    for (int y = 0; y < frame.rows; y += blockSize) {
+        for (int x = 0; x < frame.cols; x += blockSize) {
+            Rect blockRect(x, y, min(blockSize, frame.cols - x), min(blockSize, frame.rows - y));
+            Mat block = frame(blockRect);
+            processedBlocks.push_back(processBlock(block));
+        }
+    }
+
+    // Recombine processed blocks into a single output image
+    Mat result = recombineBlocks(processedBlocks, frame.rows, frame.cols, blockSize);
+
+    // Display the result
     imshow("Result", result);
-    waitKey();
+    waitKey(0);
 
     return 0;
 }
