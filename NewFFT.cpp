@@ -8,8 +8,8 @@ using namespace std;
 using namespace cv;
 
 struct MyComplex {
-    double real, imag;
-    MyComplex(double r = 0.0, double i = 0.0) : real(r), imag(i) {}
+    floatx real, imag;
+    MyComplex(floatx r = 0.0, floatx i = 0.0) : real(r), imag(i) {}
 
     MyComplex operator+(const MyComplex& other) const {
         return MyComplex(real + other.real, imag + other.imag);
@@ -28,25 +28,21 @@ struct MyComplex {
 void fft(vector<MyComplex> &a, bool inverse);
 
 // Blur detection function
-bool isBlurry(vector<MyComplex> &freqData) {
-    // Calculate average magnitude of frequency components
-    double sumMagnitude = 0.0;
+bool isBlurry(vector<MyComplex>& freqData) {
+    floatx sumMagnitude = 0.0;
     for (const auto& c : freqData) {
-        sumMagnitude += sqrt(c.real * c.real + c.imag * c.imag);
+        sumMagnitude += sqrt(c.real * c.real + c.imag * c.imag); // Note: sqrt might need adjustments for FloatX
     }
-    double averageMagnitude = sumMagnitude / freqData.size();
+    floatx averageMagnitude = sumMagnitude / freqData.size();
 
-    // Calculate average magnitude of high-frequency components (excluding DC component)
-    double sumHighMagnitude = 0.0;
+    floatx sumHighMagnitude = 0.0;
     for (size_t i = 1; i < freqData.size(); ++i) {
-        sumHighMagnitude += sqrt(freqData[i].real * freqData[i].real + freqData[i].imag * freqData[i].imag);
+        sumHighMagnitude += sqrt(freqData[i].real * freqData[i].real + freqData[i].imag * freqData[i].imag); // Adjust sqrt
     }
-    double averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
+    floatx averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
 
-    // Set a threshold ratio (you may need to adjust this value)
-    double thresholdRatio = 0.2;
+    floatx thresholdRatio = 0.2;
 
-    // Check if the ratio of average high-frequency magnitude to average magnitude is below the threshold
     return (averageHighMagnitude / averageMagnitude < thresholdRatio);
 }
 
@@ -64,20 +60,14 @@ int nextPowerOfTwo(int n) {
 
 // FFT function definition
 void fft(vector<MyComplex>& a, bool inverse = false) {
-    cout << "FFT call with vector size: " << a.size() << "\n";
-    
     int n = a.size();
     if (!isPowerOfTwo(n)) {
         int newSize = nextPowerOfTwo(n);
-        cout << "Resizing vector to: " << newSize << "\n";
         a.resize(newSize, MyComplex());
         n = newSize;
     }
 
-    if (n <= 1) {
-        cout << "Completed FFT for vector size: " << n << " (base case)\n";
-        return;
-    }
+    if (n <= 1) return;
 
     vector<MyComplex> a_even(n / 2), a_odd(n / 2);
     for (int i = 0; i < n / 2; i++) {
@@ -88,8 +78,8 @@ void fft(vector<MyComplex>& a, bool inverse = false) {
     fft(a_even, inverse);
     fft(a_odd, inverse);
 
-    double angle = 2 * M_PI / n * (inverse ? -1 : 1);
-    MyComplex w(1), wn(cos(angle), sin(angle));
+    floatx angle = 2 * M_PI / n * (inverse ? -1 : 1);
+    MyComplex w(1), wn(cos(angle), sin(angle)); // Note: cos and sin might need adjustments for FloatX
     for (int k = 0; k < n / 2; k++) {
         MyComplex t = w * a_odd[k];
         a[k] = a_even[k] + t;
@@ -102,7 +92,6 @@ void fft(vector<MyComplex>& a, bool inverse = false) {
         }
         w = w * wn;
     }
-    cout << "Completed FFT for vector size: " << n << "\n";
 }
 
 Mat recombineBlocks(const vector<Mat>& blocks, int rows, int cols, int blockSize) {
