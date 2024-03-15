@@ -19,7 +19,6 @@ g++ -o your_cpp_executable FocusMask.cpp -I /usr/local/include/opencv4 -L/usr/lo
 
 g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -L/usr/local/includez -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 
-g++ -o FocusMask2 FocusMask2.cpp -I/usr/local/include/opencv4 -I/usr/local/include -L/usr/local/lib -L/usr/local/include -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lfloatx
 
 
 python3 main.py
@@ -33,5 +32,8 @@ python3 main.py
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
+g++ -o NewFFT NewFFT.cpp -I/usr/local/include/opencv4 -I/usr/local/include/FloatX/src -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 
+
+g++ -fsanitize=address -g NewFFT.cpp -o NewFFT -I/usr/local/include/opencv4 -I/usr/local/include/FloatX/src -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 

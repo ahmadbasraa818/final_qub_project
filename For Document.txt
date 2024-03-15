@@ -1,0 +1,44 @@
+It looks like you've successfully added debugging statements to the FFT 
+function, and it's executing as expected, doubling the size of the input 
+vector until it reaches a power of two, then performing the FFT process 
+recursively. The output you've provided shows the function is called with 
+increasing vector sizes, following the expected doubling pattern until it 
+processes the entire data set, then it unwinds back as each call completes.
+
+This is a correct and expected behavior for the FFT algorithm, 
+especially in a recursive implementation where each call splits the 
+dataset into smaller chunks (even and odd elements), processes them 
+individually, and then combines them back together.
+
+The completion messages for each vector size indicate that the algorithm 
+progresses through all stages without getting indefinitely stuck, which 
+means the recursion is functioning correctly. If the process seems to 
+take longer than expected for large datasets, this might simply be due 
+to the computational complexity of the FFT, especially when the data 
+size becomes large.
+
+Based on your output, there doesn't seem to be an issue with the recursion 
+itself or the function getting stuck. If you're experiencing performance 
+issues, consider verifying the efficiency of other parts of your code or 
+he complexity of the data being processed. The FFT algorithm's computational 
+complexity is O(nlog⁡n)O(nlogn), so large datasets can significantly increase 
+processing time.
+
+FACTOR ON HOW LONG IT TAKES TO RUN
+
+Size of the Data Set: The complexity of FFT is O(nlog⁡n)O(nlogn), 
+where nn is the number of data points. So, the time to run will 
+increase with the size of the data set, but not linearly—rather, 
+it grows in proportion to nlog⁡nnlogn.
+
+Hardware: The processing power of the computer (CPU speed, RAM availability, 
+etc.) will significantly affect execution time.
+
+The time it takes to run a Fast Fourier Transform (FFT) on an image depends 
+on several factors including the size of the image (number of pixels), 
+the efficiency of the implementation, and the hardware it's running on. 
+The FFT algorithm has a computational complexity of O(nlog⁡n)O(nlogn), 
+where nn is the number of data points. For an image, if you're performing 
+a 2D FFT, this operation is typically applied separately to the rows and 
+columns, making the total complexity O(nlog⁡n+mlog⁡m)O(nlogn+mlogm) for an 
+n×mn×m image.
