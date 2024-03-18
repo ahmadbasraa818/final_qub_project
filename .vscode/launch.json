@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/ahmad/Desktop/final_qub_project",
-      "program": "c:/Users/ahmad/Desktop/final_qub_project/build/Debug/outDebug",
+      "cwd": "c:/Users/ahmad/Documents/final_qub_project",
+      "program": "c:/Users/ahmad/Documents/final_qub_project/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
