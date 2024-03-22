@@ -2,14 +2,15 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
-#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib
+//#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
+#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
 
 using namespace std;
 using namespace cv;
 using namespace flx;
 
 // Define FloatX type for convenience
-typedef floatx<11, 52> FloatX;
+typedef floatx<11, 52> FloatX; // Define FloatX type for convenience
 
 // Custom sqrt function for FloatX
 FloatX sqrt_floatx(const FloatX& value) {
@@ -44,6 +45,43 @@ struct MyComplex {
 
 // FFT function declaration
 void fft(vector<MyComplex>& a, bool inverse);
+
+Mat visualizeFFT(const vector<MyComplex>& data, int rows, int cols) {
+    Mat magnitudeImage(rows, cols, CV_32F);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            int index = i * cols + j;
+            FloatX mag = sqrt_floatx(data[index].real * data[index].real + data[index].imag * data[index].imag);
+            magnitudeImage.at<float>(i, j) = static_cast<float>(mag);
+        }
+    }
+    magnitudeImage += Scalar::all(1); // Avoid log(0)
+    log(magnitudeImage, magnitudeImage); // Apply log
+    normalize(magnitudeImage, magnitudeImage, 0, 1, NORM_MINMAX); // Normalize for display
+    return magnitudeImage;
+}
+
+Mat processBlock(const Mat& block) {
+    vector<MyComplex> blockData;
+    for (int y = 0; y < block.rows; ++y) {
+        for (int x = 0; x < block.cols; ++x) {
+            blockData.push_back(MyComplex(block.at<uchar>(y, x), 0));
+        }
+    }
+
+    // Visualize original block
+    imshow("Original Block", block);
+    waitKey(0); // Wait for key press to move on
+
+    fft(blockData, false);
+
+    // Visualize and show FFT of the block
+    Mat fftImage = visualizeFFT(blockData, block.rows, block.cols);
+    imshow("FFT Block", fftImage);
+    waitKey(0); // Wait for key press to move on
+
+    return block.clone();
+}
 
 // Blur detection function
 bool isBlurry(vector<MyComplex> &freqData) {
@@ -131,63 +169,40 @@ Mat recombineBlocks(const vector<Mat>& blocks, int rows, int cols, int blockSize
 }
 
 
-Mat processBlock(const Mat& block) {
-    vector<MyComplex> blockData;
-    for (int y = 0; y < block.rows; ++y) {
-        for (int x = 0; x < block.cols; ++x) {
-            blockData.push_back(MyComplex(block.at<uchar>(y, x), 0));
-        }
-    }
-
-    fft(blockData, false);
-    return block.clone();
-}
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         cerr << "Usage: " << argv[0] << " <image_file>" << endl;
         return 1;
     }
-    string image_file = argv[1];
-    cout << "Processing " << image_file << endl;
 
-    Mat frame = imread(image_file, IMREAD_GRAYSCALE);
-    if (frame.empty()) {
+    // Load the image in grayscale.
+    string image_file = argv[1];
+    Mat image = imread(image_file, IMREAD_GRAYSCALE);
+    if (image.empty()) {
         cerr << "Error: Unable to load image " << image_file << endl;
         return 1;
     }
 
-    vector<Mat> processedBlocks;
-    int minBlockSize = 1;
-    int maxBlockSize = min(frame.cols, frame.rows);
-    int defaultBlockSize = minBlockSize;
-
-    cout << "Enter the block size (" << minBlockSize << " - " << maxBlockSize << "): ";
+    cout << "Enter the block size: ";
     int blockSize;
     cin >> blockSize;
+    // Ensure the block size is within the valid range.
+    blockSize = max(1, min(blockSize, min(image.cols, image.rows)));
 
-    if (blockSize < minBlockSize || blockSize > maxBlockSize) {
-        cerr << "Invalid block size. Using default size: " << defaultBlockSize << endl;
-        blockSize = defaultBlockSize;
-    }
-
-    blockSize = nextPowerOfTwo(blockSize);
-
-    for (int y = 0; y < frame.rows; y += blockSize) {
-        for (int x = 0; x < frame.cols; x += blockSize) {
-            Rect blockRect(x, y, min(blockSize, frame.cols - x), min(blockSize, frame.rows - y));
-            Mat block = frame(blockRect);
-            processedBlocks.push_back(processBlock(block));
+    // Process each block of the image.
+    for (int y = 0; y < image.rows; y += blockSize) {
+        for (int x = 0; x < image.cols; x += blockSize) {
+            Rect blockRect = Rect(x, y, min(blockSize, image.cols - x), min(blockSize, image.rows - y));
+            Mat block = image(blockRect);
+            
+            // Process and possibly visualize the block.
+            Mat processedBlock = processBlock(block);
+            // If needed, you can collect or display `processedBlock` results here.
+            // For example, using imshow and waitKey to visualize each block's FFT result.
         }
     }
 
-    // Recombine processed blocks into a single output image
-    Mat result = recombineBlocks(processedBlocks, frame.rows, frame.cols, blockSize);
-
-    // Display the result
-    imshow("Result", result);
+    // Optionally, wait for a key press to close the program or move to the next step.
     waitKey(0);
-
     return 0;
 }
