@@ -2,15 +2,17 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
-//#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
-#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
+#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
+//#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
 
 using namespace std;
 using namespace cv;
 using namespace flx;
 
 // Define FloatX type for convenience
-typedef floatx<11, 52> FloatX; // Define FloatX type for convenience
+constexpr int f = 11;
+constexpr int l = 52;
+typedef floatx<f, l> Flo atX;
 
 // Custom sqrt function for FloatX
 FloatX sqrt_floatx(const FloatX& value) {
@@ -85,17 +87,17 @@ Mat processBlock(const Mat& block) {
 
 // Blur detection function
 bool isBlurry(vector<MyComplex> &freqData) {
-    flx::floatx<11, 52> sumMagnitude = 0.0;
+    flx::floatx<f, l> sumMagnitude = 0.0;
     for (const auto& c : freqData) {
         sumMagnitude += sqrt_floatx(c.real * c.real + c.imag * c.imag);
     }
-    flx::floatx<11, 52> averageMagnitude = sumMagnitude / freqData.size();
+    flx::floatx<f, l> averageMagnitude = sumMagnitude / freqData.size();
 
-    flx::floatx<11, 52> sumHighMagnitude = 0.0;
+    flx::floatx<f, l> sumHighMagnitude = 0.0;
     for (size_t i = 1; i < freqData.size(); ++i) {
         sumHighMagnitude += sqrt_floatx(freqData[i].real * freqData[i].real + freqData[i].imag * freqData[i].imag);
     }
-    flx::floatx<11, 52> averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
+    flx::floatx<f, l> averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
 
     double thresholdRatio = 0.2;
 
@@ -183,22 +185,34 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    cout << "Enter the block size: ";
+    // Corrected from 'frame' to 'image'.
+    int minBlockSize = 1;
+    int maxBlockSize = min(image.cols, image.rows);
+    int defaultBlockSize = minBlockSize;
+
+    cout << "Enter the block size (" << minBlockSize << " - " << maxBlockSize << "): ";
     int blockSize;
     cin >> blockSize;
-    // Ensure the block size is within the valid range.
-    blockSize = max(1, min(blockSize, min(image.cols, image.rows)));
+
+
+
+
+
+    if (blockSize < minBlockSize || blockSize > maxBlockSize) {
+        cerr << "Invalid block size. Using default size: " << defaultBlockSize << endl;
+        blockSize = defaultBlockSize;
+    }
 
     // Process each block of the image.
     for (int y = 0; y < image.rows; y += blockSize) {
         for (int x = 0; x < image.cols; x += blockSize) {
             Rect blockRect = Rect(x, y, min(blockSize, image.cols - x), min(blockSize, image.rows - y));
             Mat block = image(blockRect);
-            
+
             // Process and possibly visualize the block.
             Mat processedBlock = processBlock(block);
-            // If needed, you can collect or display `processedBlock` results here.
-            // For example, using imshow and waitKey to visualize each block's FFT result.
+            // If you intend to show processedBlock or do further operations with it,
+            // ensure those actions are performed here.
         }
     }
 
