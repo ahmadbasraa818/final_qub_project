@@ -2,17 +2,17 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
-#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
-//#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
+//#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
+#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
 
 using namespace std;
 using namespace cv;
 using namespace flx;
 
 // Define FloatX type for convenience
-constexpr int f = 11;
-constexpr int l = 52;
-typedef floatx<f, l> Flo atX;
+constexpr int f = 5;
+constexpr int l = 10;
+typedef floatx<f, l> FloatX;
 
 // Custom sqrt function for FloatX
 FloatX sqrt_floatx(const FloatX& value) {
@@ -176,8 +176,6 @@ int main(int argc, char** argv) {
         cerr << "Usage: " << argv[0] << " <image_file>" << endl;
         return 1;
     }
-
-    // Load the image in grayscale.
     string image_file = argv[1];
     Mat image = imread(image_file, IMREAD_GRAYSCALE);
     if (image.empty()) {
@@ -194,7 +192,7 @@ int main(int argc, char** argv) {
     int blockSize;
     cin >> blockSize;
 
-
+    
 
 
 
@@ -209,9 +207,9 @@ int main(int argc, char** argv) {
             Rect blockRect = Rect(x, y, min(blockSize, image.cols - x), min(blockSize, image.rows - y));
             Mat block = image(blockRect);
 
-            // Process and possibly visualize the block.
+            // Process each block
             Mat processedBlock = processBlock(block);
-            // If you intend to show processedBlock or do further operations with it,
+// If you intend to show processedBlock or do further operations with it,
             // ensure those actions are performed here.
         }
     }
