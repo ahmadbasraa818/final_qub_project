@@ -9,6 +9,7 @@ import glob
 import subprocess
 import skimage.segmentation
 import skimage.measure
+import tempfile
 
 logger = logging.getLogger('main')
 
@@ -61,39 +62,83 @@ def xfind_images(directory, recursive=False, ignore=True):
             yield path_a
 
 def display(title, img, max_size=200000):
+    if img is None:
+        print(f"Warning: Cannot display image '{title}' because it is None.")
+        return  # Exit the function early if img is None
+    
+    # Continue with the existing display logic...
     assert isinstance(img, numpy.ndarray), 'img must be a numpy array'
-    assert isinstance(title, str), 'title must be a string'
-    scale = numpy.sqrt(min(1.0, float(max_size)/(img.shape[0]*img.shape[1])))
+    scale = numpy.sqrt(min(1.0, float(max_size) / (img.shape[0] * img.shape[1])))
     logger.debug('image is being scaled by a factor of {0}'.format(scale))
-    shape = (int(scale*img.shape[1]), int(scale*img.shape[0]))
+    shape = (int(scale * img.shape[1]), int(scale * img.shape[0]))
     img = cv2.resize(img, shape)
     cv2.imshow(title, img)
 
-def evaluate(img_col, args, block):
-    numpy.seterr(all='ignore')
-    assert isinstance(img_col, numpy.ndarray), 'img_col must be a numpy array'
-    assert img_col.ndim == 3, 'img_col must be a color image ({0} dimensions currently)'.format(img_col.ndim)
-    assert isinstance(args, argparse.Namespace), 'args must be of type argparse.Namespace not {0}'.format(type(args))
 
-    img_gry = cv2.cvtColor(img_col, cv2.COLOR_RGB2GRAY)
-    rows, cols = img_gry.shape
-    crow, ccol = rows // 2, cols // 2
+def evaluate(args, block, img_col):
+    print("Starting image evaluation...")
 
-    f = numpy.fft.fft2(img_gry)
-    fshift = numpy.fft.fftshift(f)
-    fshift[crow - block:crow + block, ccol - block:ccol + block] = 0
-    f_ishift = numpy.fft.ifftshift(fshift)
-    img_fft = numpy.fft.ifft2(f_ishift)
-    img_fft = 20 * numpy.log(numpy.abs(img_fft))
+    # Initialize img_fft to None to ensure it's always defined
+    img_fft = None
 
-    if args.display and not args.testing:
-        cv2.destroyAllWindows()
-        display('img_fft', img_fft)
-        display('img_col', img_col)
-        cv2.waitKey(0)
+    # Save the grayscale image to a temporary file
+    temp_dir = tempfile.mkdtemp()
+    img_path = os.path.join(temp_dir, 'input_image.png')
+    print(f"Saving input image to temporary file: {img_path}")
+    cv2.imwrite(img_path, img_col)
 
-    result = numpy.mean(img_fft)
-    return img_fft, result, result < args.thresh
+    command = './NewFFT'  # Assuming NewFFT is the executable
+    print(f"Executing command: {command} with argument: {img_path}")
+    try:
+        subprocess.run([command, img_path], check=True)
+        print("C++ executable ran successfully.")
+
+        # Assume the C++ executable writes the output to 'output_image.png' in the same directory
+        output_path = os.path.join(temp_dir, 'output_image.png')
+        print(f"Expecting output image at: {output_path}")
+
+        if os.path.exists(output_path):
+            print("Output image found. Reading the image...")
+            img_fft = cv2.imread(output_path, cv2.IMREAD_GRAYSCALE)
+        else:
+            print("Warning: Expected output file not found. Skipping this image.")
+            img_fft = None  # Set img_fft to None if output image doesn't exist
+    except subprocess.CalledProcessError as e:
+        print(f"Error running C++ executable: {e}")
+        img_fft = None
+
+    # Cleanup temporary files regardless of img_fft's status
+    cleanup_temp_files(temp_dir, img_path, output_path if 'output_path' in locals() else None)
+
+    # Proceed only if img_fft is not None
+    if img_fft is not None:
+        if args.display and not args.testing:
+            cv2.destroyAllWindows()
+            display('img_fft', img_fft)
+            cv2.waitKey(0)
+    
+        result = numpy.mean(img_fft)
+        print(f"Image evaluation complete. Mean result: {result}")
+        return img_fft, result, result < args.thresh
+    else:
+        print("No output image to evaluate. Returning default values.")
+        return None, 0, False
+
+
+def cleanup_temp_files(temp_dir, img_path, output_path):
+    """Helper function to remove temporary files and directory."""
+    if os.path.exists(img_path):
+        os.remove(img_path)
+        print(f"Removed temporary input image: {img_path}")
+    if os.path.exists(output_path):
+        os.remove(output_path)
+        print(f"Removed temporary output image: {output_path}")
+    if os.path.exists(temp_dir):
+        os.rmdir(temp_dir)
+        print(f"Removed temporary directory: {temp_dir}")
+
+
+    
 
 def blur_detector(img_col, thresh=10, mask=False, block=100):
     assert isinstance(img_col, numpy.ndarray), 'img_col must be a numpy array'
@@ -174,6 +219,13 @@ def blur_mask(img):
 
     # Obtain the initial blur mask, its value, and the blur evaluation
     msk, val, blurry = blur_detector(img)
+    if msk is None:
+        print("MSK is None, skipping conversion and further processing.")
+        # Handle the case appropriately, perhaps by setting defaults or skipping processing
+        return None, 0, False
+    else:
+        # Proceed with processing since msk is not None
+        msk = cv2.convertScaleAbs(255 - (255 * msk / numpy.max(msk)))
 
     logger.debug('inverting img_fft')
     # Invert the mask and adjust intensity levels
@@ -196,6 +248,8 @@ def blur_mask(img):
 
     return msk, result, blurry
 
+
+
 def main():
     args = {'image_paths': [], 'superpixel': True, 'thresh': 10, 'mask': True, 'display': True, 'debug': False, 'quiet': False, 'save': False, 'testing': False}
     drag_and_drop_gui = DragAndDropGUI()
@@ -214,8 +268,8 @@ def main():
 
         # Get the precision level from the user
         print(args['image_paths'])
-        command = ['./NewFFT'] + args['image_paths']
-        subprocess.run(command, text=True)
+        #command = ['./NewFFT'] + args['image_paths']
+        #subprocess.run(command, text=True)
 
         # Validate the precision value
              # Call the C++ executable with precision and image paths as inputs

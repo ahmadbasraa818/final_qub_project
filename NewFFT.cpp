@@ -2,8 +2,8 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/opencv.hpp>
-//#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
-#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
+#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
+//#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
 
 using namespace std;
 using namespace cv;

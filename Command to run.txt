@@ -14,7 +14,7 @@ sudo apt install libopencv-dev
 
 TO RUN THE CODE
 ================
-1. First compile the C++ file - g++ -fsanitize=address -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
+1. First compile the C++ file - g++ -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
 2.Run the python main - python3 main.py
 
 
