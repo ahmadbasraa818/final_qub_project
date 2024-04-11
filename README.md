@@ -12,15 +12,15 @@ How to stop the code
 
 BEFORE RUNNING CHECKS
 =======================
-sudo apt update && upgrade
-sudo apt install python3 python3-pip ipython3
-pip install opencv-python
-pip install numpy==1.24.3
-pip install matplotlib
-sudo apt install libgl1-mesa-glx
-pip install easygui
-pip install scikit-image
-sudo apt install libopencv-dev
+1. 'sudo apt update && upgrade'
+2. 'sudo apt install python3 python3-pip ipython3'
+3. 'pip install opencv-python'
+4. 'pip install numpy==1.24.3'
+5. 'pip install matplotlib'
+6. 'sudo apt install libgl1-mesa-glx'
+7. 'pip install easygui'
+8. 'pip install scikit-image'
+9. 'sudo apt install libopencv-dev'
 
 
 
