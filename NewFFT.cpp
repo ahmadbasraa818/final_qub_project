@@ -1,25 +1,26 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <complex>
 #include <opencv2/opencv.hpp>
+#include <fstream>
+#include <filesystem>
 #include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
-//#include </mnt/c/Users/ahmad/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using wsl
 
 using namespace std;
 using namespace cv;
 using namespace flx;
+namespace fs = std::filesystem;
 
-// Define FloatX type for convenience
-constexpr int f = 5;
-constexpr int l = 10;
+const double PI = acos(-1);
+constexpr int f = 25;
+constexpr int l = 50;
 typedef floatx<f, l> FloatX;
 
-// Custom sqrt function for FloatX
 FloatX sqrt_floatx(const FloatX& value) {
     return FloatX(sqrt(static_cast<double>(value)));
 }
 
-// Custom trigonometric functions for FloatX
 FloatX cos_floatx(const FloatX& value) {
     return FloatX(cos(static_cast<double>(value)));
 }
@@ -43,84 +44,39 @@ struct MyComplex {
     MyComplex operator*(const MyComplex& other) const {
         return MyComplex(real * other.real - imag * other.imag, real * other.imag + imag * other.real);
     }
+    FloatX abs() const {
+        return FloatX(sqrt(static_cast<double>(real * real + imag * imag)));
+    }
 };
 
-// FFT function declaration
-void fft(vector<MyComplex>& a, bool inverse);
+void fft(vector<MyComplex>& a, bool invert);
+void saveFFTResults(const vector<vector<MyComplex>>& fftData, const string& filePath);
+void transpose(vector<vector<MyComplex>>& data);
+void fft2D(vector<vector<MyComplex>>& data, bool invert);
+double calculateBlurriness(const vector<vector<MyComplex>>& freqDomain);
+void displayFrequencyMagnitude(const vector<vector<MyComplex>>& freqDomain);
+void processSingleImage(const string& inputPath);
+bool isPowerOfTwo(int n);
+int nextPowerOfTwo(int n);
 
-Mat visualizeFFT(const vector<MyComplex>& data, int rows, int cols) {
-    Mat magnitudeImage(rows, cols, CV_32F);
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            int index = i * cols + j;
-            FloatX mag = sqrt_floatx(data[index].real * data[index].real + data[index].imag * data[index].imag);
-            magnitudeImage.at<float>(i, j) = static_cast<float>(mag);
-        }
+size_t SafeIndex(size_t index, size_t size) {
+    if (index < size) {
+        return index;
+    } else {
+        std::cerr << "Index out of bounds. Index: " << index << ", Size: " << size << std::endl;
+        // Handle the error: exit or throw an exception
+        exit(EXIT_FAILURE);
     }
-    magnitudeImage += Scalar::all(1); // Avoid log(0)
-    log(magnitudeImage, magnitudeImage); // Apply log
-    normalize(magnitudeImage, magnitudeImage, 0, 1, NORM_MINMAX); // Normalize for display
-    return magnitudeImage;
 }
 
-Mat processBlock(const Mat& block) {
-    vector<MyComplex> blockData;
-    for (int y = 0; y < block.rows; ++y) {
-        for (int x = 0; x < block.cols; ++x) {
-            blockData.push_back(MyComplex(block.at<uchar>(y, x), 0));
-        }
-    }
+void fft(vector<MyComplex>& a, bool inverse = false) {
+    int n = a.size();
+    cout << "FFT call with vector size: " << n << "\n";
 
-    // Visualize original block
-    imshow("Original Block", block);
-    waitKey(0); // Wait for key press to move on
-
-    fft(blockData, false);
-
-    // Visualize and show FFT of the block
-    Mat fftImage = visualizeFFT(blockData, block.rows, block.cols);
-    imshow("FFT Block", fftImage);
-    waitKey(0); // Wait for key press to move on
-
-    return block.clone();
-}
-
-// Blur detection function
-bool isBlurry(vector<MyComplex> &freqData) {
-    flx::floatx<f, l> sumMagnitude = 0.0;
-    for (const auto& c : freqData) {
-        sumMagnitude += sqrt_floatx(c.real * c.real + c.imag * c.imag);
-    }
-    flx::floatx<f, l> averageMagnitude = sumMagnitude / freqData.size();
-
-    flx::floatx<f, l> sumHighMagnitude = 0.0;
-    for (size_t i = 1; i < freqData.size(); ++i) {
-        sumHighMagnitude += sqrt_floatx(freqData[i].real * freqData[i].real + freqData[i].imag * freqData[i].imag);
-    }
-    flx::floatx<f, l> averageHighMagnitude = sumHighMagnitude / (freqData.size() - 1);
-
-    double thresholdRatio = 0.2;
-
-    return (averageHighMagnitude / averageMagnitude < thresholdRatio);
-}
-
-bool isPowerOfTwo(int n) {
-    return (n & (n - 1)) == 0;
-}
-
-int nextPowerOfTwo(int n) {
-    if (n < 1) return 1;
-    int power = 1;
-    while (power < n) power <<= 1;
-    return power;
-}
-
-// FFT function definition
-void fft(vector<MyComplex>& a, bool inverse = false) {    int n = a.size();
-    cout << "FFT call with vector size: " << a.size() << "\n";
     if (!isPowerOfTwo(n)) {
+        std::cerr << "Warning: Input size is not a power of two. Resizing to the nearest power of two.\n";
         int newSize = nextPowerOfTwo(n);
-        a.resize(newSize, MyComplex());
+        a.resize(newSize, MyComplex()); // Pad with zeros
         n = newSize;
     }
 
@@ -153,68 +109,157 @@ void fft(vector<MyComplex>& a, bool inverse = false) {    int n = a.size();
         w = w * wn;
     }
 }
+bool isPowerOfTwo(int n) {
+    return (n & (n - 1)) == 0;
+}
 
+int nextPowerOfTwo(int n) {
+    if (n < 1) return 1;
+    int power = 1;
+    while (power < n) power <<= 1;
+    return power;
+}
 
-Mat recombineBlocks(const vector<Mat>& blocks, int rows, int cols, int blockSize) {
-    Mat output = Mat::zeros(rows, cols, CV_8U); // Initialize the output image
-    int index = 0;
-    for (int y = 0; y < rows; y += blockSize) {
-        for (int x = 0; x < cols; x += blockSize) {
-            // Ensure we don't exceed the image bounds
-            int actualBlockSizeY = min(blockSize, rows - y);
-            int actualBlockSizeX = min(blockSize, cols - x);
-            Mat block = blocks[index++](Rect(0, 0, actualBlockSizeX, actualBlockSizeY));
-            block.copyTo(output(Rect(x, y, actualBlockSizeX, actualBlockSizeY)));
+void saveFFTResults(const std::vector<std::vector<MyComplex>>& fftData, const std::string& filePath) {
+    std::ofstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file for writing FFT results." << std::endl;
+        return;
+    }
+
+    for (const auto& row : fftData) {
+        for (const auto& val : row) {
+            file << val.real << "," << val.imag << " ";
+        }
+        file << "\n";
+    }
+    file.close();
+}
+
+void transpose(std::vector<std::vector<MyComplex>>& data) {
+    int n = data.size();
+    int m = data[0].size();
+    std::vector<std::vector<MyComplex>> result(m, std::vector<MyComplex>(n));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            result[j][i] = data[i][j];
         }
     }
-    return output;
+    data = std::move(result);
+}
+
+void fft2D(std::vector<std::vector<MyComplex>>& data, bool invert) {
+    for (auto& row : data) {
+        fft(row, invert);
+    }
+    transpose(data);
+    for (auto& row : data) {
+        fft(row, invert);
+    }
+    transpose(data);
+    if (invert) {
+        int n = data.size();
+        int m = data[0].size();
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                data[i][j] = MyComplex(data[i][j].real / (n * m), data[i][j].imag / (n * m));
+            }
+        }
+    }
+}
+
+double calculateBlurriness(const std::vector<std::vector<MyComplex>>& freqDomain) {
+    FloatX totalEnergy = 0.0;
+    FloatX highFreqEnergy = 0.0;
+    int cutoff = freqDomain.size() / 5; // Example threshold for high frequencies
+
+    for (int y = 0; y < freqDomain.size(); ++y) {
+        for (int x = 0; x < freqDomain[0].size(); ++x) {
+            // Use the abs() method from MyComplex for magnitude
+            FloatX magnitude = freqDomain[y][x].abs();
+            totalEnergy += magnitude;
+            if (x > cutoff && y > cutoff) {
+                highFreqEnergy += magnitude;
+            }
+        }
+    }
+
+    FloatX ratio = highFreqEnergy / totalEnergy;
+    return ratio; // Lower ratio indicates a blurrier image
+}
+
+
+void displayFrequencyMagnitude(const std::vector<std::vector<MyComplex>>& freqDomain) {
+    int height = freqDomain.size();
+    int width = freqDomain[0].size();
+    Mat magnitudeImage = Mat::zeros(height, width, CV_32F);
+    
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            // Use the abs() method from MyComplex to calculate magnitude
+            float magnitude = freqDomain[y][x].abs();
+            magnitudeImage.at<float>(y, x) = magnitude;
+        }
+    }
+
+    magnitudeImage += Scalar::all(1);
+    log(magnitudeImage, magnitudeImage);
+    normalize(magnitudeImage, magnitudeImage, 0, 1, NORM_MINMAX);
+    
+    imshow("Frequency Magnitude", magnitudeImage);
+    waitKey(0);
+}
+
+
+void processSingleImage(const std::string& inputPath) {
+    // Construct the expected CSV file path
+    std::string fftResultsFilePath = inputPath + "_fft_results.csv";
+
+    // Check if the CSV file exists and delete it if it does
+    if (fs::exists(fftResultsFilePath)) {
+        fs::remove(fftResultsFilePath);
+        std::cout << "Existing FFT results file removed: " << fftResultsFilePath << std::endl;
+    }
+
+    Mat img = imread(inputPath, IMREAD_GRAYSCALE);
+    if (img.empty()) {
+        std::cerr << "Error loading image: " << inputPath << std::endl;
+        return;
+    }
+
+    imshow("Original Image", img);
+    waitKey(0);
+
+    int width = img.cols;
+    int height = img.rows;
+
+    std::vector<std::vector<MyComplex>> imageData(height, std::vector<MyComplex>(width));
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            imageData[y][x] = MyComplex(img.at<uchar>(y, x), 0);
+        }
+    }
+
+    fft2D(imageData, false); // Perform FFT
+    saveFFTResults(imageData, fftResultsFilePath); // Save FFT results
+    
+    FloatX blurriness = calculateBlurriness(imageData);
+    std::cout << "Blurriness: " << blurriness << std::endl;
+
+    displayFrequencyMagnitude(imageData); // Display FFT magnitude
 }
 
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        cerr << "Usage: " << argv[0] << " <image_file>" << endl;
-        return 1;
-    }
-    string image_file = argv[1];
-    Mat image = imread(image_file, IMREAD_GRAYSCALE);
-    if (image.empty()) {
-        cerr << "Error: Unable to load image " << image_file << endl;
-        return 1;
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <ImagePath1> <ImagePath2> ..." << std::endl;
+        return -1;
     }
 
-    // Corrected from 'frame' to 'image'.
-    int minBlockSize = 1;
-    int maxBlockSize = min(image.cols, image.rows);
-    int defaultBlockSize = minBlockSize;
-
-    cout << "Enter the block size (" << minBlockSize << " - " << maxBlockSize << "): ";
-    int blockSize;
-    cin >> blockSize;
-
-    
-
-
-
-    if (blockSize < minBlockSize || blockSize > maxBlockSize) {
-        cerr << "Invalid block size. Using default size: " << defaultBlockSize << endl;
-        blockSize = defaultBlockSize;
+    for (int i = 1; i < argc; ++i) {
+        std::cout << "Processing: " << argv[i] << std::endl;
+        processSingleImage(argv[i]);
     }
 
-    // Process each block of the image.
-    for (int y = 0; y < image.rows; y += blockSize) {
-        for (int x = 0; x < image.cols; x += blockSize) {
-            Rect blockRect = Rect(x, y, min(blockSize, image.cols - x), min(blockSize, image.rows - y));
-            Mat block = image(blockRect);
-
-            // Process each block
-            Mat processedBlock = processBlock(block);
-// If you intend to show processedBlock or do further operations with it,
-            // ensure those actions are performed here.
-        }
-    }
-
-    // Optionally, wait for a key press to close the program or move to the next step.
-    waitKey(0);
     return 0;
 }
