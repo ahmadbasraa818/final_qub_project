@@ -4,7 +4,7 @@ To run this code you need the follow
 Put all images you want tested in folder "ImagesToTest"
 
 Code to run the script
-> python3 main.py --display --mask  ImagesToTest/imagewantedtested.fileextention
+> python3 main.py 
 
 How to stop the code 
 >Ctrl + C = Windows
