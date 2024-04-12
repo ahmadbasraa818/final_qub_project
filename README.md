@@ -25,7 +25,7 @@ BEFORE RUNNING CHECKS
 TO RUN THE CODE
 ================
 1. First compile the C++ file - g++ -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
-2.Run the python main - python3 main.py
+2. Run the python main - python3 main.py
 
 HOW TO RUN TESTS
 =================
