@@ -22,9 +22,24 @@ BEFORE RUNNING CHECKS
 8. 'pip install scikit-image'
 9. 'sudo apt install libopencv-dev'
 
-
-
 TO RUN THE CODE
 ================
 1. First compile the C++ file - g++ -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
 2.Run the python main - python3 main.py
+
+HOW TO RUN TESTS
+=================
+PYTHON TESTS
+=================
+1. Make sure you are in the root directory of the project
+2. Run the following command to test GUI Interaction - python3 -m unittest discover Tests -p GUIInteractionTest.py
+3. Run the following command to test the Image Proceesing - python3 -m unittest discover Tests -p ImageProcessingTest.py
+4. Make sure the .csv file for image6 and image7 are in the Images to test
+5. If they are not there run the program to generate them
+6. Run the following command to test the SubProcees Calls - python3 -m unittest discover Tests -p SubProcessCallTest.py
+
+C++ TESTS
+==============
+1. Make sure you are in the test directory
+2. Run the following command to compile the tests - g++ -o C++Tests C++Tests.cpp -std=c++17 `pkg-config --cflags --libs opencv4`
+3. Run the following command to run the test suite - ./C++Tests 
