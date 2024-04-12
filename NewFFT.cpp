@@ -249,7 +249,7 @@ void processSingleImage(const std::string& inputPath) {
     displayFrequencyMagnitude(imageData); // Display FFT magnitude
 }
 
-
+#ifndef TESTING
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <ImagePath1> <ImagePath2> ..." << std::endl;
@@ -263,3 +263,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+#endif
