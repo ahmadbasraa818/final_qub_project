@@ -28,5 +28,11 @@ PYTHON TESTS
 5. If they are not there run the program to generate them
 6. Run the following command to test the SubProcees Calls - python3 -m unittest discover Tests -p SubProcessCallTest.py
 
+C++ TESTS
+==============
+1. Make sure you are in the test directory
+2. Run the following command to compile the tests - g++ -o C++Tests C++Tests.cpp -std=c++17 `pkg-config --cflags --libs opencv4`
+3. Run the following command to run the test suite - ./C++Tests 
+
 
 
