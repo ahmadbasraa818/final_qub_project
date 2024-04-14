@@ -58,6 +58,7 @@ void displayFrequencyMagnitude(const vector<vector<MyComplex>>& freqDomain);
 void processSingleImage(const string& inputPath);
 bool isPowerOfTwo(int n);
 int nextPowerOfTwo(int n);
+void displayProgress(int current, int total);
 
 size_t SafeIndex(size_t index, size_t size) {
     if (index < size) {
@@ -67,6 +68,21 @@ size_t SafeIndex(size_t index, size_t size) {
         // Handle the error: exit or throw an exception
         exit(EXIT_FAILURE);
     }
+}
+
+
+void displayProgress(int current, int total) {
+    const int barWidth = 70;
+    float progress = static_cast<float>(current) / total;
+    int pos = barWidth * progress;
+    cout << "[";
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) cout << "=";
+        else if (i == pos) cout << ">";
+        else cout << " ";
+    }
+    cout << "] " << int(progress * 100.0) << " %\r";
+    cout.flush();
 }
 
 void fft(vector<MyComplex>& a, bool inverse = false) {
@@ -149,14 +165,30 @@ void transpose(std::vector<std::vector<MyComplex>>& data) {
 }
 
 void fft2D(std::vector<std::vector<MyComplex>>& data, bool invert) {
+    int n = data.size(); // Number of rows, assuming square image for simplicity
+    int totalOperations = 2 * n; // Twice because we process rows first, then columns
+    int completedOperations = 0;
+
+    // Process each row with FFT
     for (auto& row : data) {
         fft(row, invert);
+        completedOperations++;
+        displayProgress(completedOperations, totalOperations); // Update progress after each row
     }
+
     transpose(data);
+
+    // Process each column (now row after transpose) with FFT
     for (auto& row : data) {
         fft(row, invert);
+        completedOperations++;
+        displayProgress(completedOperations, totalOperations); // Update progress after each column
     }
+
+    // Ensure progress is marked complete at the end
+    displayProgress(totalOperations, totalOperations);
     transpose(data);
+
     if (invert) {
         int n = data.size();
         int m = data[0].size();
@@ -167,6 +199,7 @@ void fft2D(std::vector<std::vector<MyComplex>>& data, bool invert) {
         }
     }
 }
+
 
 double calculateBlurriness(const std::vector<std::vector<MyComplex>>& freqDomain) {
     FloatX totalEnergy = 0.0;
