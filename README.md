@@ -1,7 +1,10 @@
 To run this code you need the follow 
 > OpenCV
+>FloatX library (https://github.com/oprecomp/FloatX/tree/master)
+>The required python libraries look further down for details
 
 Put all images you want tested in folder "ImagesToTest"
+Or you can Drag/Drop them in the GUI when the system is ran
 
 Code to run the script
 > python3 main.py 
@@ -24,8 +27,9 @@ BEFORE RUNNING CHECKS
 
 TO RUN THE CODE
 ================
-1. First compile the C++ file - g++ -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
-2. Run the python main - python3 main.py
+1. Make sure you are in the root directory
+2. First compile the C++ file - g++ -g NewFFT.cpp -o NewFFT `pkg-config --cflags --libs opencv4`
+3. Run the python main - python3 main.py
 
 HOW TO RUN TESTS
 =================

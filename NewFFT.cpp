@@ -13,8 +13,8 @@ using namespace flx;
 namespace fs = std::filesystem;
 
 const double PI = acos(-1);
-constexpr int f = 25;
-constexpr int l = 50;
+constexpr int f = 100;
+constexpr int l = 150;
 typedef floatx<f, l> FloatX;
 
 FloatX sqrt_floatx(const FloatX& value) {
