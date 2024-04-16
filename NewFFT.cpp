@@ -13,8 +13,11 @@ using namespace flx;
 namespace fs = std::filesystem;
 
 const double PI = acos(-1);
-constexpr int f = 100;
-constexpr int l = 150;
+constexpr int f = 8;
+constexpr int l = 23;
+//Single precision = (f = 8 bits) + (l = 23 bits)
+//Double precision = (f = 11 bits) + (l = 52 bits)
+//Half precision = (f = 5 bits) + (l = 10 bits)
 typedef floatx<f, l> FloatX;
 
 FloatX sqrt_floatx(const FloatX& value) {
@@ -59,6 +62,7 @@ void processSingleImage(const string& inputPath);
 bool isPowerOfTwo(int n);
 int nextPowerOfTwo(int n);
 void displayProgress(int current, int total);
+void shiftDFT(Mat& fImage);
 
 size_t SafeIndex(size_t index, size_t size) {
     if (index < size) {
@@ -70,20 +74,49 @@ size_t SafeIndex(size_t index, size_t size) {
     }
 }
 
+void shiftDFT(Mat& fImage) {
+    int cx = fImage.cols / 2;
+    int cy = fImage.rows / 2;
 
+    Mat q0(fImage, Rect(0, 0, cx, cy));   // Top-Left
+    Mat q1(fImage, Rect(cx, 0, cx, cy));  // Top-Right
+    Mat q2(fImage, Rect(0, cy, cx, cy));  // Bottom-Left
+    Mat q3(fImage, Rect(cx, cy, cx, cy)); // Bottom-Right
+
+    Mat tmp;
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+
+    q1.copyTo(tmp);
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+}
+
+int progress_line_number = 100;
 void displayProgress(int current, int total) {
     const int barWidth = 70;
     float progress = static_cast<float>(current) / total;
     int pos = barWidth * progress;
-    cout << "[";
-    for (int i = 0; i < barWidth; ++i) {
-        if (i < pos) cout << "=";
-        else if (i == pos) cout << ">";
-        else cout << " ";
+
+    // Move up to the previous line of the progress bar
+    std::cout << "\033[" << progress_line_number << ";0H";
+
+    // If you have reached a new line (current is 0), increase the line number for the next call
+    if (current == 0) {
+        ++progress_line_number;
     }
-    cout << "] " << int(progress * 100.0) << " %\r";
-    cout.flush();
+
+    std::cout << "[";
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << "=";
+        else if (i == pos) std::cout << ">";
+        else std::cout << " ";
+    }
+    std::cout << "] " << int(progress * 100.0) << " %\r";
+    std::cout.flush();
 }
+
 
 void fft(vector<MyComplex>& a, bool inverse = false) {
     int n = a.size();
@@ -235,11 +268,28 @@ void displayFrequencyMagnitude(const std::vector<std::vector<MyComplex>>& freqDo
         }
     }
 
-    magnitudeImage += Scalar::all(1);
+    magnitudeImage += Scalar::all(1); // Avoid log(0)
     log(magnitudeImage, magnitudeImage);
+
+    // Shift the zero-frequency component to the center
+    shiftDFT(magnitudeImage);
+
+    // Normalize the magnitude to a range [0, 1] for display purposes
     normalize(magnitudeImage, magnitudeImage, 0, 1, NORM_MINMAX);
-    
-    imshow("Frequency Magnitude", magnitudeImage);
+
+    // Display the dynamic range for diagnostic purposes
+    double minVal, maxVal;
+    minMaxLoc(magnitudeImage, &minVal, &maxVal);
+    cout << "Dynamic Range - MinVal: " << minVal << ", MaxVal: " << maxVal << endl;
+
+    // Resize the image for better viewing if it's too large
+    double maxDimension = 800; // Maximum size of the window for either width or height
+    double scale = min(maxDimension / magnitudeImage.cols, maxDimension / magnitudeImage.rows);
+    Mat resizedMagnitudeImage;
+    resize(magnitudeImage, resizedMagnitudeImage, Size(), scale, scale, INTER_LINEAR);
+
+    // Display the resized frequency magnitude image
+    imshow("Frequency Magnitude", resizedMagnitudeImage);
     waitKey(0);
 }
 
