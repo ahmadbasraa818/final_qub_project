@@ -13,13 +13,12 @@ using namespace flx;
 namespace fs = std::filesystem;
 
 const double PI = acos(-1);
-constexpr int f = 8;  // Number of bits for the exponent
-constexpr int l = 7; // Number of bits for the significand (fraction)
+constexpr int f = 15;  // Number of bits for the exponent
+constexpr int l = 112; // Number of bits for the significand (fraction)
 
 // Single precision = (f = 8 bits) + (l = 23 bits) - Typical IEEE 754 single precision
-// Double precision = (f = 11 bits) + (l = 52 bits) - Typical IEEE 754 double precision
 // Half precision = (f = 5 bits) + (l = 10 bits) - Reduced precision, useful for graphics and machine learning
-// Quadruple precision = (f = 15 bits) + (l = 112 bits) - High precision for scientific computing (not directly supported in standard C++)
+// Double precision = (f = 15 bits) + (l = 112 bits) - High precision for scientific computing (not directly supported in standard C++)
 // Bfloat16 = (f = 8 bits) + (l = 7 bits) - Balances wide range with precision, popular in machine learning (requires hardware or library support)
 
 typedef floatx<f, l> FloatX;
