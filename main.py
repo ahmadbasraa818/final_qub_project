@@ -102,7 +102,7 @@ def run_fft_analysis(image_paths):
         fft_file = image_path + "_fft_results.csv"
         fft_results = load_fft_results(fft_file)
         blurriness_ratio = calculate_blurriness_ratio(fft_results)
-        print(f"Blurriness (1=Very Sharp, 0=Very Blurry): {blurriness_ratio}")
+        print(f"Blurriness (0=Very Sharp, 1=Very Blurry): {blurriness_ratio}")
         # Optionally, display a mask or the original image for visual inspection
         img = cv2.imread(image_path)
         if img is not None:
