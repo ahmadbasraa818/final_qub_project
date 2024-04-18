@@ -5,7 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <fstream>
 #include <filesystem>
-#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp> //Path to the floatx lib using vm
+#include </home/thatchaoskid/Documents/FloatX/src/floatx.hpp>
 
 using namespace std;
 using namespace cv;
@@ -13,8 +13,8 @@ using namespace flx;
 namespace fs = std::filesystem;
 
 const double PI = acos(-1);
-constexpr int f = 15;  // Number of bits for the exponent
-constexpr int l = 112; // Number of bits for the significand (fraction)
+constexpr int f = 8;  // Number of bits for the exponent
+constexpr int l = 12; // Number of bits for the significand (fraction)
 
 // Single precision = (f = 8 bits) + (l = 23 bits) - Typical IEEE 754 single precision
 // Half precision = (f = 5 bits) + (l = 10 bits) - Reduced precision, useful for graphics and machine learning
@@ -55,17 +55,18 @@ struct MyComplex {
     }
 };
 
-void fft(vector<MyComplex>& a, bool invert);
-void saveFFTResults(const vector<vector<MyComplex>>& fftData, const string& filePath);
-void transpose(vector<vector<MyComplex>>& data);
-void fft2D(vector<vector<MyComplex>>& data, bool invert);
-double calculateBlurriness(const vector<vector<MyComplex>>& freqDomain);
-void displayFrequencyMagnitude(const vector<vector<MyComplex>>& freqDomain);
-void processSingleImage(const string& inputPath);
-bool isPowerOfTwo(int n);
-int nextPowerOfTwo(int n);
-void displayProgress(int current, int total);
-void shiftDFT(Mat& fImage);
+// Declaration of functions used in the program. Definitions should follow.
+void fft(vector<MyComplex>& a, bool invert); // Performs the Fast Fourier Transform on a vector of MyComplex
+void saveFFTResults(const vector<vector<MyComplex>>& fftData, const string& filePath); // Saves the FFT results to a file
+void transpose(vector<vector<MyComplex>>& data); // Transposes a 2D vector of MyComplex
+void fft2D(vector<vector<MyComplex>>& data, bool invert); // Performs 2D FFT on a matrix of MyComplex
+double calculateBlurriness(const vector<vector<MyComplex>>& freqDomain); // Calculates the blurriness of an image based on its frequency domain representation
+void displayFrequencyMagnitude(const vector<vector<MyComplex>>& freqDomain); // Displays the magnitude of the frequencies in the frequency domain representation
+void processSingleImage(const string& inputPath); // Processes a single image for blurriness analysis
+bool isPowerOfTwo(int n); // Checks if a number is a power of two
+int nextPowerOfTwo(int n); // Finds the next power of two greater than or equal to n
+void displayProgress(int current, int total); // Displays a progress bar
+void shiftDFT(Mat& fImage); // Shifts the zero-frequency component to the center of the spectrum
 
 size_t SafeIndex(size_t index, size_t size) {
     if (index < size) {

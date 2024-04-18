@@ -75,17 +75,15 @@ def display(title, img, max_size=200000):
 def calculate_blurriness_ratio(fft_data):
     magnitude_spectrum = np.abs(fft_data)
     total_energy = np.sum(magnitude_spectrum)
-    # Assuming high frequencies are in the corners of the FFT matrix
     rows, cols = magnitude_spectrum.shape
     crow, ccol = rows // 2, cols // 2
-    # Define a high-frequency region (e.g., outer 25% of the spectrum)
     hfreq_mask = np.zeros_like(magnitude_spectrum)
     hfreq_mask[:crow//2, :] = 1
     hfreq_mask[(crow//2)*3:, :] = 1
     hfreq_mask[:, :ccol//2] = 1
     hfreq_mask[:, (ccol//2)*3:] = 1
     high_freq_energy = np.sum(magnitude_spectrum * hfreq_mask)
-    return high_freq_energy / total_energy
+    return high_freq_energy / total_energy if total_energy > 0 else 0
 
 def create_mask_from_fft(fft_data):
     magnitude = 20 * np.log(np.abs(fft_data))
@@ -103,86 +101,29 @@ def run_fft_analysis(image_paths):
         # Load FFT results
         fft_file = image_path + "_fft_results.csv"
         fft_results = load_fft_results(fft_file)
-        # Visualize the results
-        fft_results = load_fft_results('path_to_fft_results.csv')  # Load your FFT results here
-        visualize_blurriness_heatmap(fft_results)
         blurriness_ratio = calculate_blurriness_ratio(fft_results)
-        print(f"Blurriness ratio (lower indicates blurrier): {blurriness_ratio:.4f}")
+        print(f"Blurriness (1=Very Sharp, 0=Very Blurry): {blurriness_ratio}")
         # Optionally, display a mask or the original image for visual inspection
         img = cv2.imread(image_path)
         if img is not None:
             display("Processed Image", img)
 
-
-
-def visualize_blur_via_ifft(fft_data, image_path):
-    # Apply a low-pass filter to the FFT data
-    rows, cols = fft_data.shape
-    crow, ccol = rows // 2, cols // 2
-    mask = np.zeros_like(fft_data)
-    mask_size = min(rows, cols) // 5  # Example size, can be tuned
-    mask[crow-mask_size:crow+mask_size, ccol-mask_size:ccol+mask_size] = 1
-    low_pass_fft_data = fft_data * mask
-
-    # Perform an inverse FFT
-    ifft_result = np.fft.ifft2(np.fft.ifftshift(low_pass_fft_data))
-    ifft_image = np.abs(ifft_result)
-
-    # Load the original image for comparison
-    original_image = cv2.imread(image_path, 0)
-    original_image_scaled = cv2.resize(original_image, (cols, rows))
-
-    # Normalize and display the images
-    ifft_image_normalized = cv2.normalize(ifft_image, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    original_image_normalized = cv2.normalize(original_image_scaled, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
-    plt.figure(figsize=(10, 5))
-    plt.subplot(121)
-    plt.imshow(original_image_normalized, cmap='gray')
-    plt.title('Original Image')
-    plt.axis('off')
-
-    plt.subplot(122)
-    plt.imshow(ifft_image_normalized, cmap='gray')
-    plt.title('Blurriness Visualization')
-    plt.axis('off')
-
-    plt.show()
-
-def visualize_blurriness_heatmap(fft_data, blurriness_ratio):
-    rows, cols = fft_data.shape
-    crow, ccol = rows // 2, cols // 2
-    
-    # Here's an example usage of blurriness_ratio to adjust the mask size dynamically
-    mask_size = int((crow + ccol) // 4 * blurriness_ratio)  # This is just an example
-    
-    y, x = np.ogrid[-crow:rows-crow, -ccol:cols-ccol]
-    mask = np.exp(-(x*x + y*y) / (2.0 * mask_size**2))
-    
-    fft_magnitude = np.abs(fft_data)
-    low_freq_magnitude = fft_magnitude * mask
-    log_low_freq_magnitude = np.log1p(low_freq_magnitude)
-    
-    norm_low_freq_mag = cv2.normalize(log_low_freq_magnitude, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    
+def visualize_blurriness_heatmap(fft_data):
+    magnitude = np.abs(fft_data)
+    magnitude_log = np.log1p(magnitude)
     plt.figure(figsize=(10, 6))
-    plt.imshow(norm_low_freq_mag, cmap='inferno')
-    plt.title('Blurriness Heatmap')
-    plt.axis('off')
+    plt.imshow(magnitude_log, cmap='inferno')
     plt.colorbar()
+    plt.title('Blurriness Heatmap (Log Scale)')
+    plt.axis('off')
     plt.show()
-
 
 def main():
-    selected_paths = easygui.fileopenbox(msg="Drag and drop images to test blur", 
-                                         title="Image Blur Tester", 
-                                         default="*.png;*.jpg", 
-                                         multiple=True)
+    selected_paths = easygui.fileopenbox(msg="Drag and drop images to test blur", title="Image Blur Tester", default="*.png;*.jpg", multiple=True)
     if not selected_paths:
         print("No images selected.")
         return
     
-    # Resolve wildcards to actual file paths and remove any duplicates
     resolved_paths = set()
     for path in selected_paths:
         if '*' in path or '?' in path:
@@ -192,21 +133,14 @@ def main():
     
     for img_path in resolved_paths:
         print(f"Processing image: {img_path}")
-        # Run the external FFT process
         subprocess.run(['./NewFFT', img_path], check=True)
         
-        # Load FFT results
-        fft_file = img_path + "_fft_results.csv"  # Adjusted to the naming convention
+        fft_file = img_path + "_fft_results.csv"
         fft_results = load_fft_results(fft_file)
         
-        # Calculate the blurriness ratio
-        blurriness_ratio = calculate_blurriness_ratio(fft_results)
-        print(f"Blurriness ratio (lower indicates blurrier): {blurriness_ratio:.4f}")
+        blurriness_ratio = calculate_blurriness_ratio(fft_results)        
+        visualize_blurriness_heatmap(fft_results)
         
-        # Visualize the blurriness heatmap
-        visualize_blurriness_heatmap(fft_results, blurriness_ratio)
-        
-        # Optionally, display the original image for visual inspection
         img = cv2.imread(img_path)
         if img is not None:
             display("Processed Image", img)
