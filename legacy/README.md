@@ -12,7 +12,7 @@ compared with it. Nothing here is used by the current code.
 - `README.original.md`, `Command to run.txt`, `For Document.txt` and
   `original-dependencies.txt`: the original instructions, notes and pinned
   dependencies. The file was renamed from `requirements.txt` so that nothing
-  installs, or security-scans, its 2021 pins as if they were live.
+  installs, or security-scans, its old pins as if they were live.
 
 ## What the rebuild changed, and why
 
