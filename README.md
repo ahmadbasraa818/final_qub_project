@@ -11,11 +11,11 @@ $ blurfft analyse photo.jpg --precision float16
 photo.jpg: BLURRED (p=1.00; moderate, ~2.7 px, motion at 29 deg) [float16, FFT 2.4 ms]
 ```
 
-The project began as my final-year project at Queen's University Belfast and
-was rebuilt in 2026: an exact Bluestein transform in place of power-of-two
-padding, precision that can be chosen at run time, a measured detector, and a
-benchmark with ground truth. [`legacy/`](legacy/) keeps the original code and
-lists every change.
+The project began as my final-year project at Queen's University Belfast
+(2021 to 2022) and was rebuilt in 2026: an exact Bluestein transform in place
+of power-of-two padding, precision that can be chosen at run time, a measured
+detector, and a benchmark with ground truth. [`legacy/`](legacy/) keeps the
+original code and lists every change.
 
 The detector also runs in the browser, on
 [thecodingexplorer.com](https://www.thecodingexplorer.com), as a JavaScript
