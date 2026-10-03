@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install ruff
-      - run: ruff check src tests
+      - run: ruff check src tests scripts
 
   cpp:
     name: C++ tests (${{ matrix.os }})

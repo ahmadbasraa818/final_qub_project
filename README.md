@@ -11,11 +11,15 @@ $ blurfft analyse photo.jpg --precision float16
 photo.jpg: BLURRED (p=1.00; moderate, ~2.7 px, motion at 29 deg) [float16, FFT 2.4 ms]
 ```
 
-The project began as my final-year project at Queen's University Belfast
-(2023-24) and was rebuilt in 2026: an exact Bluestein transform in place of
-power-of-two padding, precision that can be chosen at run time, a measured
-detector, and a benchmark with ground truth. [`legacy/`](legacy/) keeps the
-original code and lists every change.
+The project began as my final-year project at Queen's University Belfast and
+was rebuilt in 2026: an exact Bluestein transform in place of power-of-two
+padding, precision that can be chosen at run time, a measured detector, and a
+benchmark with ground truth. [`legacy/`](legacy/) keeps the original code and
+lists every change.
+
+The detector also runs in the browser, on
+[thecodingexplorer.com](https://www.thecodingexplorer.com), as a JavaScript
+port that is tested against this implementation's numbers.
 
 ## Results
 
@@ -176,7 +180,7 @@ blurfft.rfft2(image, precision="float16")    # numpy.fft.rfft2's layout, in half
 
 ```bash
 pip install ".[bench,test]"
-pytest                                   # 83 Python tests
+pytest                                   # 84 Python tests
 cmake -S . -B build && cmake --build build && ctest --test-dir build   # 254 C++ checks
 blurfft evaluate --out results           # about 6 minutes on 12 cores
 blurfft benchmark --out results          # about 3 minutes
@@ -184,6 +188,10 @@ blurfft report --results results --out docs
 ```
 
 `blurfft evaluate --fit` refits the shipped model.
+
+`python scripts/export_reference_values.py` writes reference values for
+testing a port of the detector: features, probabilities and radius estimates
+for a few 8-bit test images, and one Gaussian blur.
 
 ## Layout
 
@@ -193,6 +201,7 @@ cpp/python/            pybind11 bindings
 cpp/tests/             C++ tests
 src/blurfft/           the Python package: detector, model, benchmark, evaluation, CLI, GUI
 tests/                 Python tests
+scripts/               reference values for ports of the detector
 docs/                  method, results and figures
 results/               the JSON results behind docs/results.md
 examples/              sample images
