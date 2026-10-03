@@ -1,0 +1,424 @@
+{
+  "standard": {
+    "methods": {
+      "This project (spectral model)": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "spearman_sigma": 0.695033300086103
+      },
+      "High-frequency share (this project)": {
+        "auc": 0.9557834201388888,
+        "balanced_accuracy": 0.8697916666666667,
+        "spearman_sigma": 0.4600747857592992
+      },
+      "Spectral slope (this project)": {
+        "auc": 0.9117296006944444,
+        "balanced_accuracy": 0.859375,
+        "spearman_sigma": 0.054927488051750115
+      },
+      "Variance of the Laplacian": {
+        "auc": 0.9913194444444444,
+        "balanced_accuracy": 0.9427083333333334,
+        "spearman_sigma": 0.6779321646308157
+      },
+      "Tenengrad": {
+        "auc": 0.9342447916666667,
+        "balanced_accuracy": 0.8125,
+        "spearman_sigma": 0.6840191913045486
+      },
+      "FFT high-pass (Rosebrock)": {
+        "auc": 0.8939344618055556,
+        "balanced_accuracy": 0.77734375,
+        "spearman_sigma": 0.5837346519689148
+      },
+      "Original project": {
+        "auc": 0.8859592013888888,
+        "balanced_accuracy": 0.8268229166666667,
+        "spearman_sigma": 0.23515640826096737
+      }
+    },
+    "precisions": {
+      "float64": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 0.0,
+        "exponent_bits": 11,
+        "mantissa_bits": 52,
+        "native": true
+      },
+      "float32": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.8615275999905242e-08,
+        "exponent_bits": 8,
+        "mantissa_bits": 23,
+        "native": true
+      },
+      "float16": {
+        "auc": 0.9860026041666666,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 0.00012602187504985048,
+        "exponent_bits": 5,
+        "mantissa_bits": 10,
+        "native": true
+      },
+      "e8m7": {
+        "auc": 0.9849175347222222,
+        "balanced_accuracy": 0.9231770833333334,
+        "agreement": 0.9935897435897436,
+        "mean_abs_dp": 0.005826128394042214,
+        "exponent_bits": 8,
+        "mantissa_bits": 7,
+        "native": false
+      },
+      "e8m12": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.948394447422836e-05,
+        "exponent_bits": 8,
+        "mantissa_bits": 12,
+        "native": false
+      },
+      "e8m23": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.8615275999905242e-08,
+        "exponent_bits": 8,
+        "mantissa_bits": 23,
+        "native": false
+      },
+      "e8m18": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 8.350093477824783e-07,
+        "exponent_bits": 8,
+        "mantissa_bits": 18,
+        "native": false
+      },
+      "e8m14": {
+        "auc": 0.9860568576388888,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 6.173399745467693e-06,
+        "exponent_bits": 8,
+        "mantissa_bits": 14,
+        "native": false
+      },
+      "e8m10": {
+        "auc": 0.9860026041666666,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 1.0,
+        "mean_abs_dp": 0.00012574375428683624,
+        "exponent_bits": 8,
+        "mantissa_bits": 10,
+        "native": false
+      },
+      "e8m8": {
+        "auc": 0.9856228298611112,
+        "balanced_accuracy": 0.9244791666666667,
+        "agreement": 0.9967948717948718,
+        "mean_abs_dp": 0.0014376740708021518,
+        "exponent_bits": 8,
+        "mantissa_bits": 8,
+        "native": false
+      },
+      "e8m6": {
+        "auc": 0.9836697048611112,
+        "balanced_accuracy": 0.92578125,
+        "agreement": 0.9791666666666667,
+        "mean_abs_dp": 0.022371359696362163,
+        "exponent_bits": 8,
+        "mantissa_bits": 6,
+        "native": false
+      },
+      "e8m5": {
+        "auc": 0.9797092013888888,
+        "balanced_accuracy": 0.9153645833333334,
+        "agreement": 0.9407051282051282,
+        "mean_abs_dp": 0.06482147357654364,
+        "exponent_bits": 8,
+        "mantissa_bits": 5,
+        "native": false
+      },
+      "e8m4": {
+        "auc": 0.9678276909722222,
+        "balanced_accuracy": 0.81640625,
+        "agreement": 0.7419871794871795,
+        "mean_abs_dp": 0.2529085865226053,
+        "exponent_bits": 8,
+        "mantissa_bits": 4,
+        "native": false
+      },
+      "e8m3": {
+        "auc": 0.93212890625,
+        "balanced_accuracy": 0.7356770833333334,
+        "agreement": 0.5657051282051282,
+        "mean_abs_dp": 0.414898916978397,
+        "exponent_bits": 8,
+        "mantissa_bits": 3,
+        "native": false
+      },
+      "e8m2": {
+        "auc": 0.8541666666666667,
+        "balanced_accuracy": 0.55859375,
+        "agreement": 0.33333333333333337,
+        "mean_abs_dp": 0.6155731219838388,
+        "exponent_bits": 8,
+        "mantissa_bits": 2,
+        "native": false
+      }
+    },
+    "severity": {
+      "spearman_probability_vs_sigma": 0.695033300086103,
+      "spearman_sigma_estimate": 0.8122713859423004,
+      "median_relative_sigma_error": 0.16564576288353866
+    },
+    "motion": {
+      "balanced_accuracy": 0.7569444444444444,
+      "median_angle_error_deg": 3.2448393354375895,
+      "anisotropy_threshold": 0.3816839134243587
+    },
+    "folds": [
+      [
+        "astronaut",
+        "coffee",
+        "coins",
+        "grass",
+        "rocket",
+        "immunohistochemistry"
+      ],
+      [
+        "camera",
+        "chelsea",
+        "brick",
+        "gravel",
+        "text",
+        "hubble_deep_field"
+      ]
+    ],
+    "counts": {
+      "samples": 624,
+      "sharp": 96,
+      "blurred": 384,
+      "unlabelled": 144,
+      "sources": 12
+    }
+  },
+  "varied_contrast": {
+    "methods": {
+      "This project (spectral model)": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "spearman_sigma": 0.7256174499714562
+      },
+      "High-frequency share (this project)": {
+        "auc": 0.9273003472222222,
+        "balanced_accuracy": 0.859375,
+        "spearman_sigma": 0.4236277300413143
+      },
+      "Spectral slope (this project)": {
+        "auc": 0.8765733506944444,
+        "balanced_accuracy": 0.8346354166666666,
+        "spearman_sigma": 0.07670297360255353
+      },
+      "Variance of the Laplacian": {
+        "auc": 0.9683702256944444,
+        "balanced_accuracy": 0.8841145833333333,
+        "spearman_sigma": 0.6414982223662996
+      },
+      "Tenengrad": {
+        "auc": 0.8941514756944444,
+        "balanced_accuracy": 0.7721354166666666,
+        "spearman_sigma": 0.603806580700924
+      },
+      "FFT high-pass (Rosebrock)": {
+        "auc": 0.8779839409722223,
+        "balanced_accuracy": 0.8059895833333334,
+        "spearman_sigma": 0.5693360800603086
+      },
+      "Original project": {
+        "auc": 0.8242730034722222,
+        "balanced_accuracy": 0.7604166666666667,
+        "spearman_sigma": 0.2304069538410396
+      }
+    },
+    "precisions": {
+      "float64": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 0.0,
+        "exponent_bits": 11,
+        "mantissa_bits": 52,
+        "native": true
+      },
+      "float32": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.9625420943469793e-08,
+        "exponent_bits": 8,
+        "mantissa_bits": 23,
+        "native": true
+      },
+      "float16": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 9.211315249269011e-05,
+        "exponent_bits": 5,
+        "mantissa_bits": 10,
+        "native": true
+      },
+      "e8m7": {
+        "auc": 0.9951171875,
+        "balanced_accuracy": 0.953125,
+        "agreement": 0.9951923076923077,
+        "mean_abs_dp": 0.0038426610266241133,
+        "exponent_bits": 8,
+        "mantissa_bits": 7,
+        "native": false
+      },
+      "e8m12": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.9772561000395195e-05,
+        "exponent_bits": 8,
+        "mantissa_bits": 12,
+        "native": false
+      },
+      "e8m23": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 2.9625420943469793e-08,
+        "exponent_bits": 8,
+        "mantissa_bits": 23,
+        "native": false
+      },
+      "e8m18": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 8.544020571194461e-07,
+        "exponent_bits": 8,
+        "mantissa_bits": 18,
+        "native": false
+      },
+      "e8m14": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 5.532634778406246e-06,
+        "exponent_bits": 8,
+        "mantissa_bits": 14,
+        "native": false
+      },
+      "e8m10": {
+        "auc": 0.9950629340277778,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 8.757234778440705e-05,
+        "exponent_bits": 8,
+        "mantissa_bits": 10,
+        "native": false
+      },
+      "e8m8": {
+        "auc": 0.9952256944444444,
+        "balanced_accuracy": 0.953125,
+        "agreement": 1.0,
+        "mean_abs_dp": 0.0009243516789303767,
+        "exponent_bits": 8,
+        "mantissa_bits": 8,
+        "native": false
+      },
+      "e8m6": {
+        "auc": 0.9951714409722222,
+        "balanced_accuracy": 0.953125,
+        "agreement": 0.983974358974359,
+        "mean_abs_dp": 0.01407986056756552,
+        "exponent_bits": 8,
+        "mantissa_bits": 6,
+        "native": false
+      },
+      "e8m5": {
+        "auc": 0.9954969618055556,
+        "balanced_accuracy": 0.9505208333333334,
+        "agreement": 0.969551282051282,
+        "mean_abs_dp": 0.03529206388151611,
+        "exponent_bits": 8,
+        "mantissa_bits": 5,
+        "native": false
+      },
+      "e8m4": {
+        "auc": 0.9932725694444444,
+        "balanced_accuracy": 0.8880208333333334,
+        "agreement": 0.8157051282051282,
+        "mean_abs_dp": 0.17533883434366915,
+        "exponent_bits": 8,
+        "mantissa_bits": 4,
+        "native": false
+      },
+      "e8m3": {
+        "auc": 0.9677191840277778,
+        "balanced_accuracy": 0.7799479166666667,
+        "agreement": 0.6618589743589743,
+        "mean_abs_dp": 0.33120334159740683,
+        "exponent_bits": 8,
+        "mantissa_bits": 3,
+        "native": false
+      },
+      "e8m2": {
+        "auc": 0.88037109375,
+        "balanced_accuracy": 0.64453125,
+        "agreement": 0.44551282051282054,
+        "mean_abs_dp": 0.5277476071139846,
+        "exponent_bits": 8,
+        "mantissa_bits": 2,
+        "native": false
+      }
+    },
+    "severity": {
+      "spearman_probability_vs_sigma": 0.7256174499714562,
+      "spearman_sigma_estimate": 0.8865465129285927,
+      "median_relative_sigma_error": 0.12833147600400313
+    },
+    "motion": {
+      "balanced_accuracy": 0.796875,
+      "median_angle_error_deg": 2.332338946583139,
+      "anisotropy_threshold": 0.33165337593057587
+    },
+    "folds": [
+      [
+        "astronaut",
+        "coffee",
+        "coins",
+        "grass",
+        "rocket",
+        "immunohistochemistry"
+      ],
+      [
+        "camera",
+        "chelsea",
+        "brick",
+        "gravel",
+        "text",
+        "hubble_deep_field"
+      ]
+    ],
+    "counts": {
+      "samples": 624,
+      "sharp": 96,
+      "blurred": 384,
+      "unlabelled": 144,
+      "sources": 12
+    }
+  }
+}
