@@ -10,7 +10,9 @@ compared with it. Nothing here is used by the current code.
 - `tests/`: the original tests.
 - `Notes.txt`: the supervisor's guidance on the project's scope.
 - `README.original.md`, `Command to run.txt`, `For Document.txt` and
-  `requirements.txt`: the original instructions and notes.
+  `original-dependencies.txt`: the original instructions, notes and pinned
+  dependencies. The file was renamed from `requirements.txt` so that nothing
+  installs, or security-scans, its 2021 pins as if they were live.
 
 ## What the rebuild changed, and why
 
