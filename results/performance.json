@@ -1,0 +1,570 @@
+{
+  "machine": {
+    "system": "Darwin",
+    "machine": "arm64",
+    "python": "3.11.9",
+    "cores": 12,
+    "native_float16": true,
+    "cpu": "Apple M2 Max"
+  },
+  "speed": [
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "numpy pocketfft (float64)",
+      "threads": 1,
+      "fft_ms": 1.1248750379309058,
+      "analysis_ms": null,
+      "fps": 888.9876353193855
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float64",
+      "threads": 1,
+      "fft_ms": 15.826624992769212,
+      "analysis_ms": 19.40449996618554,
+      "fps": 51.53443797792312,
+      "spectrum_mb": 2.46528
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float64",
+      "threads": 12,
+      "fft_ms": 2.988583000842482,
+      "analysis_ms": 4.25804202677682,
+      "fps": 234.84972522851373,
+      "spectrum_mb": 2.46528
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float32",
+      "threads": 1,
+      "fft_ms": 13.263417000416666,
+      "analysis_ms": 16.887917008716613,
+      "fps": 59.21393381338001,
+      "spectrum_mb": 1.23264
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float32",
+      "threads": 12,
+      "fft_ms": 2.522583003155887,
+      "analysis_ms": 3.6708330153487623,
+      "fps": 272.4177307490493,
+      "spectrum_mb": 1.23264
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float16",
+      "threads": 1,
+      "fft_ms": 13.586124987341464,
+      "analysis_ms": 17.141750024165958,
+      "fps": 58.33710085552689,
+      "spectrum_mb": 0.61632
+    },
+    {
+      "size": "480p (640 x 480)",
+      "height": 480,
+      "width": 640,
+      "precision": "float16",
+      "threads": 12,
+      "fft_ms": 2.7074170066043735,
+      "analysis_ms": 3.6746669793501496,
+      "fps": 272.1335036942167,
+      "spectrum_mb": 0.61632
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "numpy pocketfft (float64)",
+      "threads": 1,
+      "fft_ms": 4.142875026445836,
+      "analysis_ms": null,
+      "fps": 241.3782683804242
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float64",
+      "threads": 1,
+      "fft_ms": 57.40820901701227,
+      "analysis_ms": 68.02283303113654,
+      "fps": 14.700946071185587,
+      "spectrum_mb": 7.38432
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float64",
+      "threads": 12,
+      "fft_ms": 8.693750016391277,
+      "analysis_ms": 12.808915984351188,
+      "fps": 78.07061902987829,
+      "spectrum_mb": 7.38432
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float32",
+      "threads": 1,
+      "fft_ms": 47.590875008609146,
+      "analysis_ms": 58.064249984454364,
+      "fps": 17.222301162380152,
+      "spectrum_mb": 3.69216
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float32",
+      "threads": 12,
+      "fft_ms": 7.90070800576359,
+      "analysis_ms": 11.454791005235165,
+      "fps": 87.29971586063608,
+      "spectrum_mb": 3.69216
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float16",
+      "threads": 1,
+      "fft_ms": 48.21604100288823,
+      "analysis_ms": 58.757874998264015,
+      "fps": 17.01899532666123,
+      "spectrum_mb": 1.84608
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "height": 720,
+      "width": 1280,
+      "precision": "float16",
+      "threads": 12,
+      "fft_ms": 7.507000002078712,
+      "analysis_ms": 10.960167041048408,
+      "fps": 91.23948533400672,
+      "spectrum_mb": 1.84608
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "numpy pocketfft (float64)",
+      "threads": 1,
+      "fft_ms": 10.105833993293345,
+      "analysis_ms": null,
+      "fps": 98.95274359975059
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float64",
+      "threads": 1,
+      "fft_ms": 130.23491704370826,
+      "analysis_ms": 154.8411250114441,
+      "fps": 6.4582325911549106,
+      "spectrum_mb": 16.60608
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float64",
+      "threads": 12,
+      "fft_ms": 19.14112502709031,
+      "analysis_ms": 27.964250009972602,
+      "fps": 35.75994348653657,
+      "spectrum_mb": 16.60608
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float32",
+      "threads": 1,
+      "fft_ms": 109.24966697348282,
+      "analysis_ms": 132.73333298275247,
+      "fps": 7.533902581425731,
+      "spectrum_mb": 8.30304
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float32",
+      "threads": 12,
+      "fft_ms": 17.138625029474497,
+      "analysis_ms": 23.63283297745511,
+      "fps": 42.31401292235953,
+      "spectrum_mb": 8.30304
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float16",
+      "threads": 1,
+      "fft_ms": 108.64037502324209,
+      "analysis_ms": 132.20870797522366,
+      "fps": 7.563798295248474,
+      "spectrum_mb": 4.15152
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "height": 1080,
+      "width": 1920,
+      "precision": "float16",
+      "threads": 12,
+      "fft_ms": 16.27254200866446,
+      "analysis_ms": 24.032499990426004,
+      "fps": 41.61031937577768,
+      "spectrum_mb": 4.15152
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "numpy pocketfft (float64)",
+      "threads": 1,
+      "fft_ms": 4.66233299812302,
+      "analysis_ms": null,
+      "fps": 214.48489423698047
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float64",
+      "threads": 1,
+      "fft_ms": 10.163999977521598,
+      "analysis_ms": 22.28579204529524,
+      "fps": 44.87163830513757,
+      "spectrum_mb": 8.404992
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float64",
+      "threads": 12,
+      "fft_ms": 2.2003750200383365,
+      "analysis_ms": 6.163374986499548,
+      "fps": 162.24876827881343,
+      "spectrum_mb": 8.404992
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float32",
+      "threads": 1,
+      "fft_ms": 8.863332972396165,
+      "analysis_ms": 20.817375043407083,
+      "fps": 48.036796085715075,
+      "spectrum_mb": 4.202496
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float32",
+      "threads": 12,
+      "fft_ms": 2.1865000016987324,
+      "analysis_ms": 6.008333002682775,
+      "fps": 166.4355154006096,
+      "spectrum_mb": 4.202496
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float16",
+      "threads": 1,
+      "fft_ms": 9.527416026685387,
+      "analysis_ms": 21.523375005926937,
+      "fps": 46.461114937811935,
+      "spectrum_mb": 2.101248
+    },
+    {
+      "size": "1024 x 1024",
+      "height": 1024,
+      "width": 1024,
+      "precision": "float16",
+      "threads": 12,
+      "fft_ms": 2.1542919566854835,
+      "analysis_ms": 5.932042025960982,
+      "fps": 168.57601406456683,
+      "spectrum_mb": 2.101248
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "numpy pocketfft (float64)",
+      "threads": 1,
+      "fft_ms": 27.37616701051593,
+      "analysis_ms": null,
+      "fps": 36.528123152370924
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float64",
+      "threads": 1,
+      "fft_ms": 43.66491595283151,
+      "analysis_ms": 54.07545802881941,
+      "fps": 18.49267738919663,
+      "spectrum_mb": 8.05576
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float64",
+      "threads": 12,
+      "fft_ms": 6.859166023787111,
+      "analysis_ms": 10.67683397559449,
+      "fps": 93.66072398295577,
+      "spectrum_mb": 8.05576
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float32",
+      "threads": 1,
+      "fft_ms": 35.56716698221862,
+      "analysis_ms": 47.00179200153798,
+      "fps": 21.275784548114213,
+      "spectrum_mb": 4.02788
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float32",
+      "threads": 12,
+      "fft_ms": 6.029000040143728,
+      "analysis_ms": 9.561999992001802,
+      "fps": 104.58063175449243,
+      "spectrum_mb": 4.02788
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float16",
+      "threads": 1,
+      "fft_ms": 36.17279103491455,
+      "analysis_ms": 47.640583012253046,
+      "fps": 20.99050718465814,
+      "spectrum_mb": 2.01394
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "height": 997,
+      "width": 1009,
+      "precision": "float16",
+      "threads": 12,
+      "fft_ms": 6.203999975696206,
+      "analysis_ms": 9.535709046758711,
+      "fps": 104.86897147306635,
+      "spectrum_mb": 2.01394
+    }
+  ],
+  "padding": [
+    {
+      "size": "480p (640 x 480)",
+      "exact_ms": 2.884874993469566,
+      "padded_ms": 1.241207995917648,
+      "padded_shape": "1024 x 512",
+      "extra_pixels": 0.7066666666666668,
+      "bluestein_rows": true,
+      "bluestein_columns": true
+    },
+    {
+      "size": "720p (1280 x 720)",
+      "exact_ms": 8.997500000987202,
+      "padded_ms": 4.476624948438257,
+      "padded_shape": "2048 x 1024",
+      "extra_pixels": 1.2755555555555556,
+      "bluestein_rows": true,
+      "bluestein_columns": true
+    },
+    {
+      "size": "1080p (1920 x 1080)",
+      "exact_ms": 19.259124994277954,
+      "padded_ms": 9.046291001141071,
+      "padded_shape": "2048 x 2048",
+      "extra_pixels": 1.022716049382716,
+      "bluestein_rows": true,
+      "bluestein_columns": true
+    },
+    {
+      "size": "1024 x 1024",
+      "exact_ms": 2.276709012221545,
+      "padded_ms": 2.229584031738341,
+      "padded_shape": "1024 x 1024",
+      "extra_pixels": 0.0,
+      "bluestein_rows": false,
+      "bluestein_columns": false
+    },
+    {
+      "size": "1009 x 997 (primes)",
+      "exact_ms": 7.001166988629848,
+      "padded_ms": 2.3423749953508377,
+      "padded_shape": "1024 x 1024",
+      "extra_pixels": 0.042350043192014075,
+      "bluestein_rows": true,
+      "bluestein_columns": true
+    }
+  ],
+  "accuracy": [
+    {
+      "precision": "float64",
+      "mantissa_bits": 52,
+      "exponent_bits": 11,
+      "unit_roundoff": 1.1102230246251565e-16,
+      "error": 0.0,
+      "original_error": 0.0
+    },
+    {
+      "precision": "float32",
+      "mantissa_bits": 23,
+      "exponent_bits": 8,
+      "unit_roundoff": 5.960464477539063e-08,
+      "error": 2.2765318021731406e-07,
+      "original_error": 1.1184883043159241e-06
+    },
+    {
+      "precision": "float16",
+      "mantissa_bits": 10,
+      "exponent_bits": 5,
+      "unit_roundoff": 0.00048828125,
+      "error": 0.00165686539671287,
+      "original_error": null
+    },
+    {
+      "precision": "e8m7",
+      "mantissa_bits": 7,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.00390625,
+      "error": 0.012987490003747095,
+      "original_error": 0.055999452865089686
+    },
+    {
+      "precision": "e8m12",
+      "mantissa_bits": 12,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.0001220703125,
+      "error": 0.00042489654109909556,
+      "original_error": 0.004653249639460913
+    },
+    {
+      "precision": "e8m23",
+      "mantissa_bits": 23,
+      "exponent_bits": 8,
+      "unit_roundoff": 5.960464477539063e-08,
+      "error": 2.2765318021731406e-07,
+      "original_error": 1.1184883043159241e-06
+    },
+    {
+      "precision": "e8m18",
+      "mantissa_bits": 18,
+      "exponent_bits": 8,
+      "unit_roundoff": 1.9073486328125e-06,
+      "error": 6.842390694598204e-06,
+      "original_error": 5.615492719809249e-05
+    },
+    {
+      "precision": "e8m14",
+      "mantissa_bits": 14,
+      "exponent_bits": 8,
+      "unit_roundoff": 3.0517578125e-05,
+      "error": 0.00010545783262074854,
+      "original_error": 0.001117199505533116
+    },
+    {
+      "precision": "e8m10",
+      "mantissa_bits": 10,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.00048828125,
+      "error": 0.0016569564783232452,
+      "original_error": 0.009626307020919437
+    },
+    {
+      "precision": "e8m8",
+      "mantissa_bits": 8,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.001953125,
+      "error": 0.006551723479135005,
+      "original_error": 0.018079866660843533
+    },
+    {
+      "precision": "e8m6",
+      "mantissa_bits": 6,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.0078125,
+      "error": 0.026505112198383213,
+      "original_error": 0.05286028721181826
+    },
+    {
+      "precision": "e8m5",
+      "mantissa_bits": 5,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.015625,
+      "error": 0.060379677180238456,
+      "original_error": 0.1105532789562205
+    },
+    {
+      "precision": "e8m4",
+      "mantissa_bits": 4,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.03125,
+      "error": 0.10684870141974173,
+      "original_error": 0.770101558884864
+    },
+    {
+      "precision": "e8m3",
+      "mantissa_bits": 3,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.0625,
+      "error": 0.23400523332439,
+      "original_error": 1.0277050065377091
+    },
+    {
+      "precision": "e8m2",
+      "mantissa_bits": 2,
+      "exponent_bits": 8,
+      "unit_roundoff": 0.125,
+      "error": 0.43265755858330307,
+      "original_error": 0.7747689215271371
+    }
+  ],
+  "energy": {
+    "float64": null,
+    "float32": null,
+    "float16": null
+  },
+  "emulation": {
+    "e8m12_720p_ms": 402.31145900906995,
+    "note": "emulated formats round every operation in software: a tool for accuracy studies, not for speed"
+  }
+}

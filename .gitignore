@@ -1,0 +1,24 @@
+# Builds
+build/
+_skbuild/
+dist/
+*.egg-info/
+*.so
+*.pyd
+*.dylib
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+myenv/
+.pytest_cache/
+
+# Per-sample arrays from `blurfft evaluate` (large; the JSON summaries are kept)
+results/*.npz
+
+# Editors and the OS
+.vscode/
+.idea/
+.DS_Store

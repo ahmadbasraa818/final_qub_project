@@ -1,0 +1,42 @@
+[build-system]
+requires = ["scikit-build-core>=0.9", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "blurfft"
+version = "2.0.0"
+description = "Image blur detection with approximate FFTs: Bluestein's algorithm in any floating-point precision"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Ahmad Basraa" }]
+dependencies = ["numpy>=1.22", "pillow>=9.0"]
+classifiers = [
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.optional-dependencies]
+# The benchmark draws its ground-truth images from scikit-image's sample data
+# (CC0 and public-domain photographs) and plots with matplotlib.
+bench = ["matplotlib>=3.6", "scikit-image>=0.20"]
+test = ["pytest>=7", "scikit-image>=0.20"]
+
+[project.scripts]
+blurfft = "blurfft.cli:main"
+
+[tool.scikit-build]
+minimum-version = "0.9"
+cmake.build-type = "Release"
+wheel.packages = ["src/blurfft"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+ignore = ["E501"]  # long lines: the browser interface embeds its page as one string
